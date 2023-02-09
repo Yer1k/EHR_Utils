@@ -9,5 +9,3 @@
 - Each patient has a unique identifier in the form of a PatientID.
 
 - The date and time fields in both files are formatted as dates and times in the format "YYYY-MM-DD HH:MM:SS".
-
-- The data in the files is considered to be complete and accurate for the purposes of this parsing.
