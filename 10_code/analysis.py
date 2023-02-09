@@ -108,16 +108,12 @@ def patient_is_sick(
 
 
 if __name__ == "__main__":
-
+    """Test the functions in this module."""
     # Path to the table of patients with demographic data
     patient_filename = "../00_source_data/PatientCorePopulatedTable.txt"
-    # Download the data if not,
-    # http://people.ee.duke.edu/~pkw3/static/PatientCorePopulatedTable.txt
 
     # Path to the table of laboratory results
     lab_filename = "../00_source_data/LabsCorePopulatedTable.txt"
-    # Download the data if not,
-    # http://people.ee.duke.edu/~pkw3/static/LabsCorePopulatedTable.txt
 
     records = parse_data(patient_filename, lab_filename)
 
