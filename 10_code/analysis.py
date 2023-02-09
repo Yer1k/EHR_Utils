@@ -4,19 +4,27 @@ This module is desigened to be generalizable to other data files.
 See readme.md for more information, including assumptions, limitations, etc.
 """
 
-import datetime
+from datetime import datetime
+from typing import Dict, Any
+
+# VarType = Union[
+#     SupportsIndex, slice, str, datetime, Dict[str, str], Dict[str, List[str]]
+# ]
+
+VarType = Dict[Any, Any]
 
 
-def parse_data(
-    patient_filename: str, lab_filename: str
-) -> dict[str, str | list[dict[str, str]]]:
+def parse_data(patient_filename: str, lab_filename: str) -> VarType:
     """Read and parse data from patient and lab files."""
-    # (dict[str, str], sict[str, list[str]])
+    # (dict[str, str], dict[str, list[str]])
     # PATIENT_DICT = ...
     # LAB_DICT = ...
     # (PATIENT_DICT, LAB_DICT)
+
     patients = {}
-    # read the files and parse the data into a dictionary
+    labs: VarType = {}
+
+    # read the patient and parse the data into a dictionary
     with open(patient_filename, "r", encoding="utf-8-sig") as f:
         column_names = f.readline().strip().split("\t")
         for line in f:
@@ -26,7 +34,7 @@ def parse_data(
             }
             patients[patient["PatientID"]] = patient
 
-    labs = {}
+    # read the lab file and parse the data into the dictionary
     with open(lab_filename, "r", encoding="utf-8-sig") as f:
         column_names = f.readline().strip().split("\t")
         for line in f:
@@ -45,12 +53,12 @@ def parse_data(
     # convert the dates to datetime objects
     for patient_id in patients:
         patient = patients[patient_id]
-        patient["PatientDateOfBirth"] = datetime.datetime.strptime(
+        patient["PatientDateOfBirth"] = datetime.strptime(
             patient["PatientDateOfBirth"], "%Y-%m-%d %H:%M:%S.%f"
         )
         if "labs" in patient:
             for lab in patient["labs"]:
-                lab["LabDateTime"] = datetime.datetime.strptime(
+                lab["LabDateTime"] = datetime.strptime(
                     lab["LabDateTime"], "%Y-%m-%d %H:%M:%S.%f"
                 )
 
@@ -58,8 +66,7 @@ def parse_data(
     for patient_id in patients:
         patient = patients[patient_id]
         patient["age"] = int(
-            (datetime.datetime.now() - patient["PatientDateOfBirth"]).days
-            / 365
+            (datetime.now() - patient["PatientDateOfBirth"]).days / 365
         )
 
     # return the dictionary
@@ -67,15 +74,21 @@ def parse_data(
     return patients
 
 
-def patient_age(records: dict, patient_id: str) -> float:
+def patient_age(records: VarType, patient_id: str) -> float | None:
+    """Return the age of the patient."""
     if patient_id not in records:
         return None
     return records[patient_id]["age"]
 
 
 def patient_is_sick(
-    records: dict, patient_id: str, lab_name: str, operator: str, value: float
+    records: VarType,
+    patient_id: str,
+    lab_name: str,
+    operator: str,
+    value: float,
 ) -> bool:
+    """Return True if the patient is sick, False otherwise."""
     if patient_id not in records:
         return False
     patient = records[patient_id]
