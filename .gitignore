@@ -3,3 +3,5 @@ __pycache__
 venv/
 10_code/*.ipynb
 10_code/.*/
+00_source_data/*
+00_source_data/
