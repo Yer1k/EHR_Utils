@@ -8,7 +8,15 @@ from datetime import datetime
 
 
 def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
-    """Create a dictionary of patient personal file."""
+    """
+    Create a dictionary of patient personal file.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to create dictionary.
+    The function will scale according to the number of patients (NP) and
+        the number of columns in the patient personal file (MP).
+    Thus, the function will scale according to O(NP*MP).
+    """
     patient_dict = {}  # O(1)
     with open(
         patient_filename, "r", encoding="utf-8-sig"
@@ -27,7 +35,15 @@ def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
 
 
 def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
-    """Create a dictionary of lab results."""
+    """
+    Create a dictionary of lab results.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to create dictionary.
+    The function will scale according to the number of patients (NP) and
+        the number of columns in the lab results file (ML).
+    Thus, the function will scale according to O(NL*ML).
+    """
     lab_dict: dict[str, list[dict[str, str]]] = {}  # O(1)
     with open(lab_filename, "r", encoding="utf-8-sig") as lab_file:  # O(1)
         lab_column_names = lab_file.readline().strip().split("\t")  # O(ML)
@@ -47,7 +63,14 @@ def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
 def parse_data(
     patient_filename: str, lab_filename: str
 ) -> tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]]:
-    """Read and parse data from patient and lab files."""
+    """
+    Read and parse data from patient and lab files.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to call two functions.
+    The function will scale according to the number of patients (NP) and
+        the number of columns in the patient personal file (MP).
+    """
     return patient_data(patient_filename), lab_data(lab_filename)  # O(1)
 
 
@@ -55,7 +78,13 @@ def patient_age(
     records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
     patient_id: str,
 ) -> int:
-    """Return the age of the patient."""
+    """
+    Return the age of the patient.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to calculate the age.
+    Overall, the function will not scale, istead it will run O(1).
+    """
     patient = records[0][patient_id]  # O(1)
     birth_date = datetime.strptime(
         patient["PatientDateOfBirth"], "%Y-%m-%d %H:%M:%S.%f"
@@ -72,7 +101,15 @@ def patient_is_sick(
     operator: str,
     value: float,
 ) -> bool:
-    """Return True if the patient is sick, False otherwise."""
+    """
+    Return True if the patient is sick, False otherwise.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to check if the patient_id is on
+        the dictionary of lab results.
+    The function will scale according to the loop of the lab results (NL).
+    Thus, the function will scale according to O(NL).
+    """
     if patient_id in records[1]:  # O(1)
         for lab in records[1][patient_id]:  # O(NL)
             if lab["LabName"] == lab_name:  # O(1)
@@ -109,4 +146,3 @@ if __name__ == "__main__":
             4.0,
         )
     )
-    # test files exist
