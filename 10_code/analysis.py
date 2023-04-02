@@ -5,105 +5,82 @@ See readme.md for more information, including assumptions, limitations, etc.
 """
 
 from datetime import datetime
-from typing import Dict, Any
-
-# VarType = Union[
-#     SupportsIndex, slice, str, datetime, Dict[str, str], Dict[str, List[str]]
-# ]
-
-VarType = Dict[Any, Any]
 
 
-def parse_data(patient_filename: str, lab_filename: str) -> VarType:
-    """Read and parse data from patient and lab files."""
-    # (dict[str, str], dict[str, list[str]])
-    # PATIENT_DICT = ...
-    # LAB_DICT = ...
-    # (PATIENT_DICT, LAB_DICT)
-
-    patients = {}
-    labs: VarType = {}
-
-    # read the patient and parse the data into a dictionary
-    with open(patient_filename, "r", encoding="utf-8-sig") as f:
-        column_names = f.readline().strip().split("\t")
-        for line in f:
-            values = line.strip().split("\t")
+def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
+    """Create a dictionary of patient personal file."""
+    patient_dict = {}
+    with open(patient_filename, "r", encoding="utf-8-sig") as patient_file:
+        patient_column_names = patient_file.readline().strip().split("\t")
+        for line in patient_file:
+            patient_values = line.strip().split("\t")
             patient = {
-                column_names[i]: values[i] for i in range(len(column_names))
+                patient_column_names[i]: patient_values[i]
+                for i in range(len(patient_column_names))
             }
-            patients[patient["PatientID"]] = patient
+            patient_dict[patient["PatientID"]] = patient
+    return patient_dict
 
-    # read the lab file and parse the data into the dictionary
-    with open(lab_filename, "r", encoding="utf-8-sig") as f:
-        column_names = f.readline().strip().split("\t")
-        for line in f:
-            values = line.strip().split("\t")
+
+def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
+    """Create a dictionary of lab results."""
+    lab_dict: dict[str, list[dict[str, str]]] = {}
+    with open(lab_filename, "r", encoding="utf-8-sig") as lab_file:
+        lab_column_names = lab_file.readline().strip().split("\t")
+        for line in lab_file:
+            lab_values = line.strip().split("\t")
             lab = {
-                column_names[i]: values[i] for i in range(len(column_names))
+                lab_column_names[i]: lab_values[i]
+                for i in range(len(lab_column_names))
             }
             patient_id = lab["PatientID"]
-            if patient_id not in labs:
-                labs[patient_id] = []
-            labs[patient_id].append(lab)
-            if "labs" not in patients[patient_id]:
-                patients[patient_id]["labs"] = []
-            patients[patient_id]["labs"].append(lab)
-
-    # convert the dates to datetime objects
-    for patient_id in patients:
-        patient = patients[patient_id]
-        patient["PatientDateOfBirth"] = datetime.strptime(
-            patient["PatientDateOfBirth"], "%Y-%m-%d %H:%M:%S.%f"
-        )
-        if "labs" in patient:
-            for lab in patient["labs"]:
-                lab["LabDateTime"] = datetime.strptime(
-                    lab["LabDateTime"], "%Y-%m-%d %H:%M:%S.%f"
-                )
-
-    # add the age of the patient to the dictionary
-    for patient_id in patients:
-        patient = patients[patient_id]
-        patient["age"] = int(
-            (datetime.now() - patient["PatientDateOfBirth"]).days / 365
-        )
-
-    # return the dictionary
-
-    return patients
+            if patient_id not in lab_dict:
+                lab_dict[patient_id] = []
+            lab_dict[patient_id].append(lab)
+    return lab_dict
 
 
-def patient_age(records: VarType, patient_id: str) -> float | None:
+def parse_data(
+    patient_filename: str, lab_filename: str
+) -> tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]]:
+    """Read and parse data from patient and lab files."""
+    return patient_data(patient_filename), lab_data(lab_filename)
+
+
+def patient_age(
+    records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
+    patient_id: str,
+) -> int:
     """Return the age of the patient."""
-    if patient_id not in records:
-        return None
-    return records[patient_id]["age"]
+    patient = records[0][patient_id]
+    birth_date = datetime.strptime(
+        patient["PatientDateOfBirth"], "%Y-%m-%d %H:%M:%S.%f"
+    )
+    day_now = datetime.now()
+    patient_age = int((day_now - birth_date).days / 365)
+    return patient_age
 
 
 def patient_is_sick(
-    records: VarType,
+    records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
     patient_id: str,
     lab_name: str,
     operator: str,
     value: float,
 ) -> bool:
     """Return True if the patient is sick, False otherwise."""
-    if patient_id not in records:
-        return False
-    patient = records[patient_id]
-    if "labs" not in patient:
-        return False
-    for lab in patient["labs"]:
-        if lab["LabName"] != lab_name:
-            continue
-        lab_value = float(lab["LabValue"])
-        if operator == ">":
-            if lab_value > value:
-                return True
-        elif operator == "<":
-            if lab_value < value:
-                return True
+    if patient_id in records[1]:
+        for lab in records[1][patient_id]:
+            if lab["LabName"] == lab_name:
+                if operator == ">":
+                    if float(lab["LabValue"]) > value:
+                        return True
+                elif operator == "<":
+                    if float(lab["LabValue"]) < value:
+                        return True
+                elif operator == "=":
+                    if float(lab["LabValue"]) == value:
+                        return True
     return False
 
 
