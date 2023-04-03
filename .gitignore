@@ -4,9 +4,14 @@ venv/
 10_code/*.ipynb
 10_code/.*/
 <<<<<<< HEAD
+<<<<<<< HEAD
 00_source_data/*
 00_source_data/
 .coverage
 test_report.txt
 =======
 >>>>>>> d394c7a (trying to solve conflict)
+=======
+00_source_data/*
+00_source_data/
+>>>>>>> 1fa59b3 (add things back)
