@@ -3,7 +3,10 @@ __pycache__
 venv/
 10_code/*.ipynb
 10_code/.*/
+<<<<<<< HEAD
 00_source_data/*
 00_source_data/
 .coverage
 test_report.txt
+=======
+>>>>>>> d394c7a (trying to solve conflict)
