@@ -60,6 +60,7 @@ def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
     return lab_dict  # O(1)
 
 
+
 def parse_data(
     patient_filename: str, lab_filename: str
 ) -> tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]]:
@@ -94,6 +95,7 @@ def patient_age(
     return patient_age  # O(1)
 
 
+
 def patient_is_sick(
     records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
     patient_id: str,
@@ -125,6 +127,7 @@ def patient_is_sick(
     return False  # O(1)
 
 
+
 if __name__ == "__main__":
     """Test the functions in this module."""
     # Path to the table of patients with demographic data
@@ -146,3 +149,4 @@ if __name__ == "__main__":
             4.0,
         )
     )
+
