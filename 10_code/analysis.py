@@ -29,7 +29,8 @@ def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
             patient = {
                 patient_column_names[i]: patient_values[i]
                 for i in range(len(patient_column_names))
-            }  # O(1)
+            }  # O(1) to create the dictionary,
+            # but then scale to O(MP), number of columns
             patient_dict[patient["PatientID"]] = patient  # O(1)
     return patient_dict  # O(1)
 
@@ -40,8 +41,8 @@ def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
 
     Time complexity analysis:
     The function will run O(1) time complexity to create dictionary.
-    The function will scale according to the number of patients (NP) and
-        the number of columns in the lab results file (ML).
+    The function will scale according to the number of rows in the
+    lab results (NL) and the number of columns in the lab results file (ML).
     Thus, the function will scale according to O(NL*ML).
     """
     lab_dict: dict[str, list[dict[str, str]]] = {}  # O(1)
@@ -52,7 +53,8 @@ def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
             lab = {
                 lab_column_names[i]: lab_values[i]
                 for i in range(len(lab_column_names))
-            }  # O(1)
+            }  # O(1) to create the dictionary,
+            # but then scale to O(ML), number of columns
             patient_id = lab["PatientID"]  # O(1)
             if patient_id not in lab_dict:  # O(1)
                 lab_dict[patient_id] = []  # O(1)
@@ -70,8 +72,13 @@ def parse_data(
     The function will run O(1) time complexity to call two functions.
     The function will scale according to the number of patients (NP) and
         the number of columns in the patient personal file (MP).
+    In addition, the function will scale according to the number of rows
+        in the lab results (NL) and the number of columns in the lab results
+        file (ML).
+    To sum up, the time complexity will be O(NP*MP + NL*ML).
     """
-    return patient_data(patient_filename), lab_data(lab_filename)  # O(1)
+    return patient_data(patient_filename), lab_data(lab_filename)
+    # O(NP*MP + NL*ML)
 
 
 def patient_age(
@@ -105,23 +112,25 @@ def patient_is_sick(
     Return True if the patient is sick, False otherwise.
 
     Time complexity analysis:
-    The function will run O(1) time complexity to check if the patient_id is on
-        the dictionary of lab results.
+    The function will run O(1) time complexity to check if the patient_id
+        is on the dictionary of lab results.
     The function will scale according to the loop of the lab results (NL).
     Thus, the function will scale according to O(NL).
     """
     if patient_id in records[1]:  # O(1)
         for lab in records[1][patient_id]:  # O(NL)
-            if lab["LabName"] == lab_name:  # O(1)
-                if operator == ">":  # O(1)
-                    if float(lab["LabValue"]) > value:  # O(1)
-                        return True  # O(1)
-                elif operator == "<":  # O(1)
-                    if float(lab["LabValue"]) < value:  # O(1)
-                        return True  # O(1)
-                elif operator == "=":  # O(1)
-                    if float(lab["LabValue"]) == value:  # O(1)
-                        return True  # O(1)
+            if (
+                (lab["LabName"] == lab_name)
+                and (operator == ">")
+                and (float(lab["LabValue"]) > value)
+            ):  # O(1)
+                return True  # O(1)
+            elif (
+                (lab["LabName"] == lab_name)
+                and (operator == "<")
+                and (float(lab["LabValue"]) < value)
+            ):
+                return True  # O(1)
     return False  # O(1)
 
 
