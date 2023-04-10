@@ -134,26 +134,3 @@ def patient_is_sick(
             ):
                 return True  # O(1)
     return False  # O(1)
-
-
-if __name__ == "__main__":
-    """Test the functions in this module."""
-    # Path to the table of patients with demographic data
-    patient_filename = "../00_source_data/PatientCorePopulatedTable.txt"
-
-    # Path to the table of laboratory results
-    lab_filename = "../00_source_data/LabsCorePopulatedTable.txt"
-
-    records = parse_data(patient_filename, lab_filename)
-
-    print(patient_age(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C"))
-
-    print(
-        patient_is_sick(
-            records,
-            "1A8791E3-A61C-455A-8DEE-763EB90C9B2C",
-            "METABOLIC: ALBUMIN",
-            ">",
-            4.0,
-        )
-    )
