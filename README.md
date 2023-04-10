@@ -6,7 +6,7 @@ This ehr-utils application provides some simple analytical capabilities for EHR 
 
 ### Requirements
 
-To use this ehr-utils application, you need to have a working Python 3.6+ environment.
+To use this ehr-utils application, you need to have a working Python 3.10.8+ environment.
 
 ### Installation
 
@@ -71,4 +71,15 @@ True
 
 ## Instruction for contributors
 
+For generalization purpose, the ehr-utils application is designed to be used by both end users and developers. The end users can use the ehr-utils application to perform simple analyses on EHR data. The developers can use the ehr-utils application as a template to develop their own EHR data analysis tools.
 
+### Development requirements
+**Pull requests are welcome.**
+
+For major changes, please open an issue first to discuss what you would like to change. 
+
+**Before submitting a pull request, please make sure that your code passes all the tests.**
+
+Please make sure to update tests as appropriate. To contribute to this project, you need to have a working Python 3.10.8+ environment, and all source code should be formatted with `black`, `mypy`, `pycodestyle`, and `pydocstyle`. 
+
+You may view the specifics of the checks in this repository's workflow specification: `.github/workflows`
