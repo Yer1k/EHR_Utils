@@ -30,8 +30,7 @@ The function `patient_data(patient_filename: str) -> dict[str, dict[str, str]]` 
 ```
 
 #### Patient age
-The function `patient_age(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
-    patient_id: str) -> int` should take the data and return the age of the patient. For example,
+The function `patient_age(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]], patient_id: str) -> int` should take the data and return the age of the patient. For example,
 
 ```python
 >> patient_age(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C")
@@ -39,7 +38,7 @@ The function `patient_age(records: tuple[dict[str, dict[str, str]], dict[str, li
 ```
 
 #### Sick patients
-The function `patient_is_sick(records: DATA_TYPE, patient_id: str, lab_name: str, operator: str, value: float)` should take the data and return a boolean indicating whether the patient has ever had a test with value above (">") or below ("<") the given level. For example,
+The function `patient_is_sick(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]], patient_id: str, lab_name: str, operator: str, value: float,) -> bool` should take the data and return a boolean indicating whether **the patient has ever had a test** with value above (">") or below ("<") the given level. For example,
 
 ```python
 >> patient_is_sick(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C", "METABOLIC: ALBUMIN", ">", 4.0)
