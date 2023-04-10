@@ -114,8 +114,10 @@ def patient_is_sick(
     Time complexity analysis:
     The function will run O(1) time complexity to check if the patient_id
         is on the dictionary of lab results.
-    The function will scale according to the loop of the lab results (NL).
-    Thus, the function will scale according to O(NL).
+    The function will scale according to the loop of the lab results (NL),
+        if for a patient have multiple lab results, it will scale to O(MNL),
+        this may be implement in the future.
+    Thus, the function will scale according to O(MNL).
     """
     if patient_id in records[1]:  # O(1)
         for lab in records[1][patient_id]:  # O(NL)
