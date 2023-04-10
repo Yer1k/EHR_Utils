@@ -1,6 +1,11 @@
 """Test the analysis module."""
 import pytest
-from analysis import patient_age, patient_is_sick, parse_data
+from analysis import (
+    patient_age,
+    patient_is_sick,
+    parse_data,
+    age_at_first_admit,
+)
 from fake_files import fake_files
 
 
@@ -209,3 +214,66 @@ def test_patient_is_sick() -> None:
             patient_is_sick(records, "1", "METABOLIC: ALBUMIN", ">", 2.0)
             is True
         )
+
+
+def test_age_at_first_admit() -> None:
+    with fake_files(  # list of list (table) as txt file
+        [
+            [
+                "PatientID",
+                "PatientGender",
+                "PatientDateOfBirth",
+                "PatientRace",
+                "PatientMaritalStatus",
+                "PatientLanguage",
+                "PatientPopulationPercentageBelowPoverty",
+            ],
+            [
+                "1",
+                "Male",
+                "1947-12-28 02:45:40.547",
+                "Unknown",
+                "Married",
+                "Icelandic",
+                "18.08",
+            ],
+            [
+                "2",
+                "Female",
+                "1970-07-25 13:04:20.717",
+                "Asian",
+                "Married",
+                "English",
+                "6.67",
+            ],
+        ],
+        [
+            [
+                "PatientID",
+                "AdmissionID",
+                "LabName",
+                "LabValue",
+                "LabUnits",
+                "LabDateTime",
+            ],
+            [
+                "1",
+                "1",
+                "METABOLIC: ALBUMIN",
+                "4.0",
+                "g/dL",
+                "2019-01-01 00:00:00.000",
+            ],
+            [
+                "1",
+                "2",
+                "METABOLIC: ALBUMIN",
+                "4.6",
+                "g/dL",
+                "2020-01-02 00:00:00.000",
+            ],
+        ],
+    ) as (patient_file, lab_file):
+        records = parse_data(patient_file, lab_file)
+        assert age_at_first_admit(records, "1") == 75
+        assert age_at_first_admit(records, "wsaf") == -1

@@ -2,8 +2,8 @@
 platform darwin -- Python 3.10.9, pytest-7.2.2, pluggy-1.0.0
 rootdir: /Users/yer1k/Documents/Master/Duke/2023 Spring/BIOSTAT 821/HW/HW2/ehr-utils-Yer1k, configfile: pyproject.toml
 plugins: anyio-3.6.2
-collected 3 items
+collected 4 items
 
-tests/test_analysis.py ...                                               [100%]
+tests/test_analysis.py ....                                              [100%]
 
-============================== 3 passed in 0.02s ===============================
+============================== 4 passed in 0.02s ===============================
