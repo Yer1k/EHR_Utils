@@ -1,0 +1,241 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.10.9, pytest-7.2.2, pluggy-1.0.0
+rootdir: /Users/yer1k/Documents/Master/Duke/2023 Spring/BIOSTAT 821/HW/HW2/ehr-utils-Yer1k, configfile: pyproject.toml
+plugins: anyio-3.6.2
+collected 2 items
+
+tests/test_analysis.py FF                                                [100%]
+
+=================================== FAILURES ===================================
+______________________________ test_patient_data _______________________________
+
+    def test_patient_data() -> None:
+        """Test the patient_data function in analysis python."""
+        with fake_files(  # list of list (table) as txt file
+            [
+                [
+                    "PatientID",
+                    "PatientGender",
+                    "PatientDateOfBirth",
+                    "PatientRace",
+                    "PatientMaritalStatus",
+                    "PatientLanguage",
+                    "PatientPopulationPercentageBelowPoverty",
+                ],
+                [
+                    "1",
+                    "M",
+                    "1990-01-01 00:00:00.000",
+                    "White",
+                    "Married",
+                    "English",
+                    "0.1",
+                ],
+                [
+                    "2",
+                    "F",
+                    "1990-01-01 00:00:00.000",
+                    "White",
+                    "Married",
+                    "English",
+                    "0.1",
+                ],
+                [
+                    "3",
+                    "M",
+                    "1989-01-01 00:00:00.000",
+                    "Asian",
+                    "Unkown",
+                    "Chinese",
+                    "0.2",
+                ],
+                [
+                    "4",
+                    "F",
+                    "1979-01-01 00:00:00.000",
+                    "Black",
+                    "Divorced",
+                    "English",
+                    "0.3",
+                ],
+                [
+                    "5",
+                    "M",
+                    "1969-01-01 00:00:00.000",
+                    "Unknown",
+                    "Single",
+                    "Spanish",
+                    "0.4",
+                ],
+            ],
+            [
+                [
+                    "PatientID",
+                    "AdmissionID",
+                    "LabName",
+                    "LabValue",
+                    "LabUnits",
+                    "LabDateTime",
+                ],
+                [
+                    "1",
+                    "1",
+                    "METABOLIC: ALBUMIN",
+                    "4.0",
+                    "g/dL",
+                    "2019-01-01 00:00:00.000",
+                ],
+            ],
+        ) as (patient_file, lab_file):
+>           assert parse_data(patient_file, lab_file) == (
+                {
+                    "1": {  # patient_id
+                        "PatientGender": "M",
+                        "PatientDateOfBirth": "1990-01-01 00:00:00.000",
+                        "PatientRace": "White",
+                        "PatientMaritalStatus": "Married",
+                        "PatientLanguage": "English",
+                        "PatientPopulationPercentageBelowPoverty": "0.1",
+                    },
+                    "2": {
+                        "PatientGender": "F",
+                        "PatientDateOfBirth": "1990-01-01 00:00:00.000",
+                        "PatientRace": "White",
+                        "PatientMaritalStatus": "Married",
+                        "PatientLanguage": "English",
+                        "PatientPopulationPercentageBelowPoverty": "0.1",
+                    },
+                    "3": {
+                        "PatientGender": "M",
+                        "PatientDateOfBirth": "1989-01-01 00:00:00.000",
+                        "PatientRace": "Asian",
+                        "PatientMaritalStatus": "Unkown",
+                        "PatientLanguage": "Chinese",
+                        "PatientPopulationPercentageBelowPoverty": "0.2",
+                    },
+                    "4": {
+                        "PatientGender": "F",
+                        "PatientDateOfBirth": "1979-01-01 00:00:00.000",
+                        "PatientRace": "Black",
+                        "PatientMaritalStatus": "Divorced",
+                        "PatientLanguage": "English",
+                        "PatientPopulationPercentageBelowPoverty": "0.3",
+                    },
+                    "5": {
+                        "PatientGender": "M",
+                        "PatientDateOfBirth": "1969-01-01 00:00:00.000",
+                        "PatientRace": "Unknown",
+                        "PatientMaritalStatus": "Single",
+                        "PatientLanguage": "Spanish",
+                        "PatientPopulationPercentageBelowPoverty": "0.4",
+                    },
+                },
+                {
+                    # lab...
+                    "1": [
+                        {
+                            "PatientID": "1",
+                            "AdmissionID": "1",
+                            "LabName": "METABOLIC: ALBUMIN",
+                            "LabValue": "4.0",
+                            "LabUnits": "g/dL",
+                            "LabDateTime": "2019-01-01 00:00:00.000",
+                        }
+                    ],
+                },
+            )
+E           AssertionError: assert ({'1': {'Pati...g/dL', ...}]}) == ({'1': {'Pati...g/dL', ...}]})
+E             At index 0 diff: {'1': {'PatientID': '1', 'PatientGender': 'M', 'PatientDateOfBirth': '1990-01-01 00:00:00.000', 'PatientRace': 'White', 'PatientMaritalStatus': 'Married', 'PatientLanguage': 'English', 'PatientPopulationPercentageBelowPoverty': '0.1'}, '2': {'PatientID': '2', 'PatientGender': 'F', 'PatientDateOfBirth': '1990-01-01 00:00:00.000', 'PatientRace': 'White', 'PatientMaritalStatus': 'Married', 'PatientLanguage': 'English', 'PatientPopulationPercentageBelowPoverty': '0.1'}, '3': {'PatientID': '3', 'PatientGender': 'M', 'PatientDateOfBirth': '1989-01-01 00:00:00...
+E             
+E             ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests/test_analysis.py:85: AssertionError
+_______________________________ test_patient_age _______________________________
+
+    def test_patient_age() -> None:
+        with fake_files(  # list of list (table) as txt file
+            [
+                [
+                    "PatientID",
+                    "PatientGender",
+                    "PatientDateOfBirth",
+                    "PatientRace",
+                    "PatientMaritalStatus",
+                    "PatientLanguage",
+                    "PatientPopulationPercentageBelowPoverty",
+                ],
+                [
+                    "1",
+                    "M",
+                    "1990-01-01 00:00:00.000",
+                    "White",
+                    "Married",
+                    "English",
+                    "0.1",
+                ],
+                [
+                    "2",
+                    "F",
+                    "1990-01-01 00:00:00.000",
+                    "White",
+                    "Married",
+                    "English",
+                    "0.1",
+                ],
+                [
+                    "3",
+                    "M",
+                    "1989-01-01 00:00:00.000",
+                    "Asian",
+                    "Unkown",
+                    "Chinese",
+                    "0.2",
+                ],
+                [
+                    "4",
+                    "F",
+                    "1979-01-01 00:00:00.000",
+                    "Black",
+                    "Divorced",
+                    "English",
+                    "0.3",
+                ],
+                [
+                    "5",
+                    "M",
+                    "1969-01-01 00:00:00.000",
+                    "Unknown",
+                    "Single",
+                    "Spanish",
+                    "0.4",
+                ],
+            ],
+            [
+                [
+                    "PatientID",
+                    "AdmissionID",
+                    "LabName",
+                    "LabValue",
+                    "LabUnits",
+                    "LabDateTime",
+                ],
+                [
+                    "1",
+                    "1",
+                    "METABOLIC: ALBUMIN",
+                    "4.0",
+                    "g/dL",
+                    "2019-01-01 00:00:00.000",
+                ],
+            ],
+        ) as (patient_file, lab_file):
+            result = parse_data(patient_file, lab_file)
+>           assert patient_age(result, "1") == 30
+E           AssertionError: assert 33 == 30
+E            +  where 33 = patient_age(({'1': {'PatientDateOfBirth': '1990-01-01 00:00:00.000', 'PatientGender': 'M', 'PatientID': '1', 'PatientLanguage': 'E...missionID': '1', 'LabDateTime': '2019-01-01 00:00:00.000', 'LabName': 'METABOLIC: ALBUMIN', 'LabUnits': 'g/dL', ...}]}), '1')
+
+tests/test_analysis.py:222: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_analysis.py::test_patient_data - AssertionError: assert ({'...
+FAILED tests/test_analysis.py::test_patient_age - AssertionError: assert 33 =...
+============================== 2 failed in 0.04s ===============================
