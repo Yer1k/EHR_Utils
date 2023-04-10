@@ -98,6 +98,6 @@ For testing, you would need the `pytest` package. To run the tests, you can use 
 
 For example:
 
-[Placeholder]
+![image](https://user-images.githubusercontent.com/81750079/230937155-ddac79dd-4402-4895-87ae-598be8f3d6d9.png)
 
 You may need **at least 70% coverage** to pass the tests; however, if the coverage is not 100%, **please make sure to explain why in the pull request**.
