@@ -83,3 +83,21 @@ For major changes, please open an issue first to discuss what you would like to 
 Please make sure to update tests as appropriate. To contribute to this project, you need to have a working Python 3.10.8+ environment, and all source code should be formatted with `black`, `mypy`, `pycodestyle`, and `pydocstyle`. 
 
 You may view the specifics of the checks in this repository's workflow specification: `.github/workflows`
+
+### Tests
+For testing, you would need the `pytest` package. To run the tests, you can use the following command:
+```bash
+    pytest filename.py
+```
+
+**To see coverage report**, you can use the `coverage` package. To run the coverage report, you can use the following command:
+```bash
+    coverage run -m pytest filename.py > test_report.txt
+    coverage report --show-missing
+```
+
+For example:
+
+[Placeholder]
+
+You may need **at least 70% coverage** to pass the tests; however, if the coverage is not 100%, **please make sure to explain why in the pull request**.
