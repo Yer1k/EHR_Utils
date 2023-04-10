@@ -19,48 +19,21 @@ def test_patient_data() -> None:
             ],
             [
                 "1",
-                "M",
-                "1990-01-01 00:00:00.000",
-                "White",
+                "Male",
+                "1947-12-28 02:45:40.547",
+                "Unknown",
                 "Married",
-                "English",
-                "0.1",
+                "Icelandic",
+                "18.08",
             ],
             [
                 "2",
-                "F",
-                "1990-01-01 00:00:00.000",
-                "White",
+                "Female",
+                "1970-07-25 13:04:20.717",
+                "Asian",
                 "Married",
                 "English",
-                "0.1",
-            ],
-            [
-                "3",
-                "M",
-                "1989-01-01 00:00:00.000",
-                "Asian",
-                "Unkown",
-                "Chinese",
-                "0.2",
-            ],
-            [
-                "4",
-                "F",
-                "1979-01-01 00:00:00.000",
-                "Black",
-                "Divorced",
-                "English",
-                "0.3",
-            ],
-            [
-                "5",
-                "M",
-                "1969-01-01 00:00:00.000",
-                "Unknown",
-                "Single",
-                "Spanish",
-                "0.4",
+                "6.67",
             ],
         ],
         [
@@ -84,49 +57,26 @@ def test_patient_data() -> None:
     ) as (patient_file, lab_file):
         assert parse_data(patient_file, lab_file) == (
             {
-                "1": {  # patient_id
-                    "PatientGender": "M",
-                    "PatientDateOfBirth": "1990-01-01 00:00:00.000",
-                    "PatientRace": "White",
+                "1": {
+                    "PatientID": "1",
+                    "PatientGender": "Male",
+                    "PatientDateOfBirth": "1947-12-28 02:45:40.547",
+                    "PatientRace": "Unknown",
                     "PatientMaritalStatus": "Married",
-                    "PatientLanguage": "English",
-                    "PatientPopulationPercentageBelowPoverty": "0.1",
+                    "PatientLanguage": "Icelandic",
+                    "PatientPopulationPercentageBelowPoverty": "18.08",
                 },
                 "2": {
-                    "PatientGender": "F",
-                    "PatientDateOfBirth": "1990-01-01 00:00:00.000",
-                    "PatientRace": "White",
+                    "PatientID": "2",
+                    "PatientGender": "Female",
+                    "PatientDateOfBirth": "1970-07-25 13:04:20.717",
+                    "PatientRace": "Asian",
                     "PatientMaritalStatus": "Married",
                     "PatientLanguage": "English",
-                    "PatientPopulationPercentageBelowPoverty": "0.1",
-                },
-                "3": {
-                    "PatientGender": "M",
-                    "PatientDateOfBirth": "1989-01-01 00:00:00.000",
-                    "PatientRace": "Asian",
-                    "PatientMaritalStatus": "Unkown",
-                    "PatientLanguage": "Chinese",
-                    "PatientPopulationPercentageBelowPoverty": "0.2",
-                },
-                "4": {
-                    "PatientGender": "F",
-                    "PatientDateOfBirth": "1979-01-01 00:00:00.000",
-                    "PatientRace": "Black",
-                    "PatientMaritalStatus": "Divorced",
-                    "PatientLanguage": "English",
-                    "PatientPopulationPercentageBelowPoverty": "0.3",
-                },
-                "5": {
-                    "PatientGender": "M",
-                    "PatientDateOfBirth": "1969-01-01 00:00:00.000",
-                    "PatientRace": "Unknown",
-                    "PatientMaritalStatus": "Single",
-                    "PatientLanguage": "Spanish",
-                    "PatientPopulationPercentageBelowPoverty": "0.4",
+                    "PatientPopulationPercentageBelowPoverty": "6.67",
                 },
             },
             {
-                # lab...
                 "1": [
                     {
                         "PatientID": "1",
@@ -136,7 +86,7 @@ def test_patient_data() -> None:
                         "LabUnits": "g/dL",
                         "LabDateTime": "2019-01-01 00:00:00.000",
                     }
-                ],
+                ]
             },
         )
 
@@ -155,48 +105,21 @@ def test_patient_age() -> None:
             ],
             [
                 "1",
-                "M",
-                "1990-01-01 00:00:00.000",
-                "White",
+                "Male",
+                "1947-12-28 02:45:40.547",
+                "Unknown",
                 "Married",
-                "English",
-                "0.1",
+                "Icelandic",
+                "18.08",
             ],
             [
                 "2",
-                "F",
-                "1990-01-01 00:00:00.000",
-                "White",
+                "Female",
+                "1970-07-25 13:04:20.717",
+                "Asian",
                 "Married",
                 "English",
-                "0.1",
-            ],
-            [
-                "3",
-                "M",
-                "1989-01-01 00:00:00.000",
-                "Asian",
-                "Unkown",
-                "Chinese",
-                "0.2",
-            ],
-            [
-                "4",
-                "F",
-                "1979-01-01 00:00:00.000",
-                "Black",
-                "Divorced",
-                "English",
-                "0.3",
-            ],
-            [
-                "5",
-                "M",
-                "1969-01-01 00:00:00.000",
-                "Unknown",
-                "Single",
-                "Spanish",
-                "0.4",
+                "6.67",
             ],
         ],
         [
@@ -218,88 +141,71 @@ def test_patient_age() -> None:
             ],
         ],
     ) as (patient_file, lab_file):
-        result = parse_data(patient_file, lab_file)
-        assert patient_age(result, "1") == 30
-        assert patient_age(result, "2") == 30
-        assert patient_age(result, "3") == 31
-        assert patient_age(result, "4") == 41
-        assert patient_age(result, "5") == 51
+        records = parse_data(patient_file, lab_file)
+        assert patient_age(records, "1") == 75
+        assert patient_age(records, "2") == 52
 
 
-# def test_patient_is_sick()-> None:
-#     with fake_fake_files(  # list of list (table) as txt file
-#         [
-#             [
-#                 "PatientID",
-#                 "PatientGender",
-#                 "PatientDateOfBirth",
-#                 "PatientRace",
-#                 "PatientMaritalStatus",
-#                 "PatientLanguage",
-#                 "PatientPopulationPercentageBelowPoverty",
-#             ],
-#             [
-#                 "1",
-#                 "M",
-#                 "1990-01-01 00:00:00.000",
-#                 "White",
-#                 "Married",
-#                 "English",
-#                 "0.1",
-#             ],
-#             [
-#                 "2",
-#                 "F",
-#                 "1990-01-01 00:00:00.000",
-#                 "White",
-#                 "Married",
-#                 "English",
-#                 "0.1",
-#             ],
-#             [
-#                 "3",
-#                 "M",
-#                 "1989-01-01 00:00:00.000",
-#                 "Asian",
-#                 "Unkown",
-#                 "Chinese",
-#                 "0.2",
-#             ],
-#             [
-#                 "4",
-#                 "F",
-#                 "1979-01-01 00:00:00.000",
-#                 "Black",
-#                 "Divorced",
-#                 "English",
-#                 "0.3",
-#             ],
-#             [
-#                 "5",
-#                 "M",
-#                 "1969-01-01 00:00:00.000",
-#                 "Unknown",
-#                 "Single",
-#                 "Spanish",
-#                 "0.4",
-#             ],
-#         ],
-#         [
-#             [
-#                 "PatientID",
-#                 "AdmissionID",
-#                 "LabName",
-#                 "LabValue",
-#                 "LabUnits",
-#                 "LabDateTime",
-#             ],
-#             [
-#                 "1",
-#                 "1",
-#                 "METABOLIC: ALBUMIN",
-#                 "4.0",
-#                 "g/dL",
-#                 "2019-01-01 00:00:00.000",
-#             ],
-#         ],
-#     ) as (patient_file, lab_file):
+def test_patient_is_sick() -> None:
+    with fake_files(  # list of list (table) as txt file
+        [
+            [
+                "PatientID",
+                "PatientGender",
+                "PatientDateOfBirth",
+                "PatientRace",
+                "PatientMaritalStatus",
+                "PatientLanguage",
+                "PatientPopulationPercentageBelowPoverty",
+            ],
+            [
+                "1",
+                "Male",
+                "1947-12-28 02:45:40.547",
+                "Unknown",
+                "Married",
+                "Icelandic",
+                "18.08",
+            ],
+            [
+                "2",
+                "Female",
+                "1970-07-25 13:04:20.717",
+                "Asian",
+                "Married",
+                "English",
+                "6.67",
+            ],
+        ],
+        [
+            [
+                "PatientID",
+                "AdmissionID",
+                "LabName",
+                "LabValue",
+                "LabUnits",
+                "LabDateTime",
+            ],
+            [
+                "1",
+                "1",
+                "METABOLIC: ALBUMIN",
+                "4.0",
+                "g/dL",
+                "2019-01-01 00:00:00.000",
+            ],
+        ],
+    ) as (patient_file, lab_file):
+        records = parse_data(patient_file, lab_file)
+        assert (
+            patient_is_sick(records, "1", "METABOLIC: ALBUMIN", ">", 5.0)
+            is False
+        )
+        assert (
+            patient_is_sick(records, "1", "METABOLIC: ALBUMIN", "<", 5.0)
+            is True
+        )
+        assert (
+            patient_is_sick(records, "1", "METABOLIC: ALBUMIN", ">", 2.0)
+            is True
+        )
