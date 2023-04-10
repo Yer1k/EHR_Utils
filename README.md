@@ -20,6 +20,30 @@ To use the ehr-utils application, you need to import the analysis module:
 
     import analysis
 
+#### Patient data and lab data tabular files sturcture
+
+The patient data and lab data are stored in two **Tab Delimited** files, either in `.txt` or `.csv` format, such as `patients.txt` and `labs.txt`, respectively.
+
+The `patients.txt` file contains the following columns:
+
+- `PatientID`: a unique identifier for each patient
+- `PatientGender`: gender of the patient
+- `PatientDateOfBirth`: date of birth of the patient in the format of `YYYY-MM-DD HH:MM:SS.SSS`
+- `PatientRace`: race of the patient
+- `PatientMaritalStatus`: marital status of the patient
+- `PatientLanguage`: language of the patient
+- `PatientPopulationPercentageBelowPoverty`: percentage of the population below poverty of the patient's residence
+
+The `labs.txt` file contains the following columns:
+
+- `PatientID`: a unique identifier for each patient
+- `AdmissionID`: a unique identifier for each admission
+- `LabName`: name of the lab test
+- `LabValue`: value of the lab test
+- `LabUnits`: units of the lab test
+- `LabDateTime`: date and time of the lab test in the format of `YYYY-MM-DD HH:MM:SS.SSS`
+
+
 Then, you can use the `analysis` module to perform analyses, including parsing the patient and lab data with `parse_data` function, checking patient age with `patient_age` function, and testing whether patient is sick with `patient_is_sick` function. Specifically:
 
 #### Parse data
