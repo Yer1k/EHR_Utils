@@ -5,3 +5,5 @@ venv/
 10_code/.*/
 00_source_data/*
 00_source_data/
+.coverage
+test_report.txt
