@@ -8,3 +8,4 @@ venv/
 src/*.txt
 .coverage
 src/.*
+test_report.txt

@@ -1,8 +1,9 @@
 """Test the analysis module."""
 from analysis import (
+    parse_data,
     patient_age,
     patient_is_sick,
-    parse_data,
+    age_at_first_admit,
 )
 from fake_files import fake_files
 
@@ -155,3 +156,10 @@ def test_patient_is_sick() -> None:
     assert (
         patient_is_sick(records, "1", "METABOLIC: ALBUMIN", ">", 2.0) is True
     )
+
+
+def test_age_at_first_admit() -> None:
+    """Test the age_at_first_admit function in analysis python."""
+    records = parse_data_helper()
+    assert age_at_first_admit(records, "1") == 75
+    assert age_at_first_admit(records, "2") == -1
