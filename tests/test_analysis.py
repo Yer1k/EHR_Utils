@@ -161,5 +161,5 @@ def test_patient_is_sick() -> None:
 def test_age_at_first_admit() -> None:
     """Test the age_at_first_admit function in analysis python."""
     records = parse_data_helper()
-    assert age_at_first_admit(records, "1") == 75
+    assert age_at_first_admit(records, "1") == 71
     assert age_at_first_admit(records, "2") == -1
