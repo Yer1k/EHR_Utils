@@ -69,6 +69,14 @@ The function `patient_is_sick(records: tuple[dict[str, dict[str, str]], dict[str
 True
 ```
 
+#### Patient age at first admission
+The function `age_at_first_admit(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]], patient_id: str,) -> int` should take the data and return the age of a given patient when their earliest lab was recorded. For example,
+
+```python
+>> age_at_first_admit(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C")
+18
+```
+
 ## Instruction for contributors
 
 For generalization purpose, the ehr-utils application is designed to be used by both end users and developers. The end users can use the ehr-utils application to perform simple analyses on EHR data. The developers can use the ehr-utils application as a template to develop their own EHR data analysis tools.

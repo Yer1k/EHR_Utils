@@ -134,3 +134,40 @@ def patient_is_sick(
             ):
                 return True  # O(1)
     return False  # O(1)
+
+
+def age_at_first_admit(
+    records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
+    patient_id: str,
+) -> int:
+    """
+    Return the age of the patient at the first admission.
+
+    If results are not available, return -1 instead.
+    Time complexity analysis:
+    The function will run O(1) time complexity to check if the patient_id
+        is on the dictionary of lab results.
+    The function will scale according to the loop of the lab results (NL),
+        if for a patient have multiple lab results, it will scale to O(NLlogNL)
+        to sort the list of lab results by LabDateTime.
+    Thus, the function will scale according to O(NLlogNL).
+    """
+    if patient_id in records[1]:  # O(1)
+        for lab in records[1][patient_id]:  # O(NL)
+            if lab["AdmissionID"] == "1":  # O(1)
+                # sort the list of lab results by LabDateTime
+                sorted_lab = sorted(
+                    records[1][patient_id], key=lambda t: t["LabDateTime"]
+                )  # O(NLlogNL)
+                birth_date = datetime.strptime(
+                    records[0][patient_id]["PatientDateOfBirth"],
+                    "%Y-%m-%d %H:%M:%S.%f",
+                )  # O(1)
+                first_admit_date = datetime.strptime(
+                    sorted_lab[0]["LabDateTime"], "%Y-%m-%d %H:%M:%S.%f"
+                )  # O(1)
+                patient_age = int(
+                    (first_admit_date - birth_date).days / 365
+                )  # O(1)
+                return patient_age  # O(1)
+    return -1  # O(1)
