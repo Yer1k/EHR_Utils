@@ -7,6 +7,82 @@ See readme.md for more information, including assumptions, limitations, etc.
 from datetime import datetime
 
 
+class Lab:
+    """Lab class to store lab information."""
+
+    def __init__(
+        self,
+        id: str,
+        admission_id: str,
+        name: str,
+        value: str,
+        units: str,
+        dates: str,
+    ):
+        """Initialize a lab object."""
+        self.id = id
+        self.admission_id = admission_id
+        self.name = name
+        self.value = float(value)
+        self.units = units
+        self.dates = datetime.strptime(dates, "%Y-%m-%d %H:%M:%S.%f")
+
+
+class Patient:
+    """Patient class to store patient information."""
+
+    def __init__(
+        self, id: str, gender: str, dob: str, race: str, labs: list[Lab]
+    ):
+        """Initialize a patient object."""
+        self.id = id
+        self.gender = gender
+        self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
+        self.race = race
+        self.lab = labs
+
+    @property
+    def age(self) -> int:
+        """Calculate the age of the patient."""
+        today = datetime.today()
+        return (
+            today.year
+            - self.dob.year
+            - ((today.month, today.day) < (self.dob.month, self.dob.day))
+        )
+
+    @property
+    def first_admit(self) -> int:
+        """Calculate the age of the patient at first admission."""
+        # sort the lab list by dates
+        self.lab.sort(key=lambda x: x.dates)
+        return (
+            self.lab[0].dates.year
+            - self.dob.year
+            - (
+                (self.lab[0].dates.month, self.lab[0].dates.day)
+                < (self.dob.month, self.dob.day)
+            )
+        )
+
+    def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
+        """Check if the patient is sick."""
+        for lab in self.lab:
+            if (
+                (lab.name == lab_name)
+                and (operator == ">")
+                and (lab.value > value)
+            ):  # O(1)
+                return True  # O(1)
+            elif (
+                (lab.name == lab_name)
+                and (operator == "<")
+                and (lab.value < value)
+            ):
+                return True  # O(1)
+        return False  # O(1)
+
+
 def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
     """
     Create a dictionary of patient personal file.
@@ -31,11 +107,14 @@ def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
                 for i in range(len(patient_column_names))
             }  # O(1) to create the dictionary,
             # but then scale to O(MP), number of columns
-            patient_dict[patient["PatientID"]] = patient  # O(1)
+            patient_id = patient["PatientID"]  # O(1)
+            patient_dict[patient_id] = patient  # O(1)
     return patient_dict  # O(1)
 
 
-def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
+def lab_data(
+    lab_filename: str, patient_id: str
+) -> dict[str, list[dict[str, str]]]:
     """
     Create a dictionary of lab results.
 
@@ -77,6 +156,40 @@ def parse_data(
         file (ML).
     To sum up, the time complexity will be O(NP*MP + NL*ML).
     """
+    patient_dict = patient_data(patient_filename)  # O(NP*MP)
+    # patient = {}  # O(1)
+    # patient["PatientID"] = patient_dict[patient["PatientID"]]  # O(1)
+
+    # patient = Patient(
+    #     patient_dict["PatientID"],
+    #     patient_dict["PatientGender"],
+    #     patient_dict["PatientDOB"],
+    #     patient_dict["PatientRace"],
+    #     lab_dict["PatientID"],
+    # )
+    # patient_dict = {
+    #     id: patient_object(),
+    # }  # O(1)
+    # with open(
+    #     patient_filename, "r", encoding="utf-8-sig"
+    # ) as patient_file:  # O(1)
+    #     patient_column_names = (
+    #         patient_file.readline().strip().split("\t")
+    #     )  # O(MP)
+    #     for line in patient_file:  # O(NP)
+    #         patient_values = line.strip().split("\t")  # O(MP)
+    #         patient = {
+    #             patient_column_names[i]: patient_values[i]
+    #             for i in range(len(patient_column_names))
+    #         }  # O(1) to create the dictionary,
+    #         # but then scale to O(MP), number of columns
+    #         patient_dict[patient["PatientID"]] = Patient(
+    #             patient["PatientID"],
+    #             patient["PatientGender"],
+    #             patient["PatientDateOfBirth"],
+    #             patient["PatientRace"],
+    #         )  # O(1)
+
     return patient_data(patient_filename), lab_data(lab_filename)
     # O(NP*MP + NL*ML)
 
