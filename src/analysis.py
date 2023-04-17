@@ -9,24 +9,49 @@ import sqlite3
 
 
 class Lab:
-    """Lab class to store lab information."""
+    """Lab class to read lab data from sqlite database."""
 
     def __init__(
         self,
         patient_id: str,
-        admission_id: str,
-        name: str,
-        value: str,
-        units: str,
-        dates: str,
+        connection: sqlite3.Connection,
+        # like define connection here?
+        #     # admission_id: str,
+        #     # name: str,
+        #     # value: str,
+        #     # units: str,
+        #     # dates: str,
     ):
         """Initialize a lab object."""
         self.patient_id = patient_id
-        self.admission_id = admission_id
-        self.name = name
-        self.value = float(value)
-        self.units = units
-        self.dates = datetime.strptime(dates, "%Y-%m-%d %H:%M:%S.%f")
+
+    @property
+    def adimission_id(self):
+        """Get admission id from sqlite."""
+        admission_id = c.execute(
+            f"SELECT admission_id FROM lab WHERE patient_id = {self.patient_id}"
+        ).fetchall()
+        return admission_id
+
+    @property
+    def lab_name(self):
+        """Get lab name from sqlite."""
+        self.name = c.execute(
+            f"SELECT lab_name FROM lab WHERE patient_id = {self.patient_id}"
+        ).fetchall()
+
+    @property
+    def lab_value(self):
+        """Get lab value from sqlite."""
+        self.value = c.execute(
+            f"SELECT lab_value FROM lab WHERE patient_id = {self.patient_id}"
+        ).fetchall()
+
+    #     # self.admission_id = admission_id
+    #     # self.name = name
+    #     # self.value = float(value)
+    #     # self.units = units
+    #     # self.dates = datetime.strptime(dates, "%Y-%m-%d %H:%M:%S.%f")
 
 
 class Patient:
@@ -35,17 +60,17 @@ class Patient:
     def __init__(
         self,
         patient_id: str,
-        gender: str,
-        dob: str,
-        race: str,
-        labs: list[Lab],
+        # gender: str,
+        # dob: str,
+        # race: str,
+        # labs: list[Lab],
     ):
         """Initialize a patient object."""
         self.patient_id = patient_id
-        self.gender = gender
-        self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
-        self.race = race
-        self.lab = labs
+        # self.gender = gender
+        # self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
+        # self.race = race
+        # self.lab = labs
 
     @property
     def age(self) -> int:
@@ -88,37 +113,37 @@ class Patient:
         return False  # O(1)
 
 
-def patient_data(patient_filename: str) -> None:
+def patient_data(
+    patient_filename: str, db_connection: sqlite3.Connection
+) -> None:
     """Pass patient data to database."""
-    conn = sqlite3.connect("patient.db")
+    conn = db_connection
     c = conn.cursor()
     c.execute(
         """
         CREATE TABLE IF NOT EXISTS patient (
-            id text PRIMARY KEY,
+            patient_id text PRIMARY KEY,
             gender text,
             dob text,
             race text,
-            marital_status text,
-            language text,
-            PatientPopulationPercentageBelowPoverty float,
             """
     )
     with open(patient_filename, "r", encoding="utf-8-sig") as patient_file:
-        next(patient_file)
+        patient_column_names = patient_file.readline().strip().split("\t")
         for line in patient_file:
             patient_values = line.strip().split("\t")
+            patient = {
+                patient_column_names[i]: patient_values[i]
+                for i in range(len(patient_column_names))
+            }
             c.execute(
                 f"""
-                INSERT INTO patient VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO patient VALUES (?, ?, ?, ?)
                 [
-                    {patient_values[0]},
-                    {patient_values[1]},
-                    {patient_values[2]},
-                    {patient_values[3]},
-                    {patient_values[4]},
-                    {patient_values[5]},
-                    {patient_values[6]},
+                    {patient["PatientID"]},
+                    {patient["PatientGender"]},
+                    {patient["PatientDateOfBirth"]},
+                    {patient["PatientRace"]},
                 ]
                 """
             )
@@ -127,36 +152,40 @@ def patient_data(patient_filename: str) -> None:
     conn.close()
 
 
-def lab_data(lab_filename: str) -> None:
+def lab_data(lab_filename: str, db_connection: sqlite3.Connection) -> None:
     """Pass lab data to database."""
-    conn = sqlite3.connect("lab.db")
+    conn = db_connection
     c = conn.cursor()
     c.execute(
         """
         CREATE TABLE IF NOT EXISTS lab (
-            id text,
+            patient_id text,
             admission_id text,
             lab_name text,
             lab_value float,
             lab_units text,
             lab_dates text,
-            PRIMARY KEY (id, admission_id)
+            PRIMARY KEY (patient_id, admission_id, lab_name),
         """
     )
     with open(lab_filename, "r", encoding="utf-8-sig") as lab_file:
-        next(lab_file)
+        lab_column_names = lab_file.readline().strip().split("\t")
         for line in lab_file:
             lab_values = line.strip().split("\t")
+            lab = {
+                lab_column_names[i]: lab_values[i]
+                for i in range(len(lab_column_names))
+            }
             c.execute(
                 f"""
                 INSERT INTO lab VALUES (?, ?, ?, ?, ?, ?)
                 [
-                    {lab_values[0]},
-                    {lab_values[1]},
-                    {lab_values[2]},
-                    {lab_values[3]},
-                    {lab_values[4]},
-                    {lab_values[5]},
+                    {lab["PatientID"]},
+                    {lab["AdmissionID"]},
+                    {lab["LabName"]},
+                    {lab["LabValue"]},
+                    {lab["LabUnits"]},
+                    {lab["LabDateTimes"]},
                 ]
                 """
             )
