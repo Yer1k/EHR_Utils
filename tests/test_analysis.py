@@ -5,79 +5,59 @@ from analysis import (
     Patient,
 )
 from fake_files import fake_files
-import unittest
 from datetime import datetime
 
 
-class TestLab(unittest.TestCase):
-    """Test the Lab class."""
+def test_lab_class() -> None:
+    """Test the lab class in analysis python."""
+    lab = Lab(
+        "1",
+        "1",
+        "METABOLIC: ALBUMIN",
+        "4.0",
+        "g/dL",
+        "2019-01-01 00:00:00.000",
+    )
+    assert lab is not None
+    assert lab.patient_id == "1"
+    assert lab.admission_id == "1"
+    assert lab.name == "METABOLIC: ALBUMIN"
+    assert lab.value == 4.0
+    assert lab.units == "g/dL"
+    assert lab.dates == datetime(2019, 1, 1)
 
-    def setUp(self) -> None:
-        """Initialize a Lab object for testing."""
-        self.lab = Lab(
-            "1", "2", "test", "10.0", "mg/dL", "2023-04-16 10:00:00.000000"
-        )
 
-    def test_attributes(self) -> None:
-        """Test the attributes of the Lab object."""
-        self.assertEqual(self.lab.id, "1")
-        self.assertEqual(self.lab.admission_id, "2")
-        self.assertEqual(self.lab.name, "test")
-        self.assertEqual(self.lab.value, 10.0)
-        self.assertEqual(self.lab.units, "mg/dL")
-        self.assertEqual(self.lab.dates, datetime(2023, 4, 16, 10, 0))
-
-    def test_value_type(self) -> None:
-        """Test the value type of the Lab object."""
-        with self.assertRaises(ValueError):
+def test_patient_class() -> None:
+    """Test the patient class in analysis python."""
+    patient = Patient(
+        "1",
+        "Male",
+        "1993-12-21 17:45:40.547",
+        "Asian",
+        [
             Lab(
                 "1",
-                "2",
-                "test",
-                "invalid_value",
-                "mg/dL",
-                "2023-04-16 10:00:00.000000",
-            )
-
-
-class TestPatient(unittest.TestCase):
-    """Test the Patient class."""
-
-    def setUp(self) -> None:
-        """Initialize a Patient object for testing."""
-        self.lab1 = Lab(
-            "1", "2", "test1", "10.0", "mg/dL", "2022-04-16 10:00:00.000000"
-        )
-        self.lab2 = Lab(
-            "2", "2", "test2", "20.0", "mg/dL", "2023-04-15 09:00:00.000000"
-        )
-        self.labs = [self.lab1, self.lab2]
-        self.patient = Patient(
-            "1", "male", "1990-01-01 00:00:00.000000", "white", self.labs
-        )
-
-    def test_attributes(self) -> None:
-        """Test the attributes of the Patient object."""
-        self.assertEqual(self.patient.id, "1")
-        self.assertEqual(self.patient.gender, "male")
-        self.assertEqual(self.patient.dob, datetime(1990, 1, 1))
-        self.assertEqual(self.patient.race, "white")
-        self.assertEqual(self.patient.lab, self.labs)
-
-    def test_age(self) -> None:
-        """Test the age of the patient."""
-        self.assertEqual(self.patient.age, 33)
-
-    def test_first_admit(self) -> None:
-        """Test the age of the patient at first admission."""
-        self.assertEqual(self.patient.first_admit, 32)
-
-    def test_is_sick(self) -> None:
-        """Test if the patient is sick."""
-        self.assertTrue(self.patient.is_sick("test1", ">", 5.0))
-        self.assertTrue(self.patient.is_sick("test2", "<", 30.0))
-        self.assertFalse(self.patient.is_sick("test1", "<", 5.0))
-        self.assertFalse(self.patient.is_sick("test2", ">", 30.0))
+                "1",
+                "METABOLIC: ALBUMIN",
+                "4.0",
+                "g/dL",
+                "2019-01-01 00:00:00.000",
+            ),
+        ],
+    )
+    assert patient is not None
+    assert patient.patient_id == "1"
+    assert patient.gender == "Male"
+    assert patient.dob == datetime(1993, 12, 21, 17, 45, 40, 547000)
+    assert patient.race == "Asian"
+    assert patient.age == 29
+    assert patient.first_admit == 25
+    assert patient.lab[0].patient_id == "1"
+    assert patient.lab[0].admission_id == "1"
+    assert patient.lab[0].name == "METABOLIC: ALBUMIN"
+    assert patient.lab[0].value == 4.0
+    assert patient.lab[0].units == "g/dL"
+    assert patient.lab[0].dates == datetime(2019, 1, 1)
 
 
 def test_parse_data() -> None:
@@ -124,11 +104,16 @@ def test_parse_data() -> None:
     ) as (patient_file, lab_file):
         patient = parse_data(patient_file, lab_file)
         assert patient is not None
-        assert patient["1"].id == "1"
+        assert patient["1"].patient_id == "1"
         assert patient["1"].gender == "Male"
         assert patient["1"].dob == datetime(1947, 12, 28, 2, 45, 40, 547000)
         assert patient["1"].race == "Unknown"
-        assert patient["1"].lab[0].id == "1"
+        assert patient["1"].age == 75
+        assert patient["1"].first_admit == 71
+        assert patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
+        assert patient["1"].is_sick("METABOLIC: ALBUMIN", "<", 5.0)
+        assert patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 3.0)
+        assert patient["1"].lab[0].patient_id == "1"
         assert patient["1"].lab[0].admission_id == "1"
         assert patient["1"].lab[0].name == "METABOLIC: ALBUMIN"
         assert patient["1"].lab[0].value == 4.0

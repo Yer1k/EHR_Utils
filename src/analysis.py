@@ -13,7 +13,7 @@ class Lab:
 
     def __init__(
         self,
-        id: str,
+        patient_id: str,
         admission_id: str,
         name: str,
         value: str,
@@ -21,7 +21,7 @@ class Lab:
         dates: str,
     ):
         """Initialize a lab object."""
-        self.id = id
+        self.patient_id = patient_id
         self.admission_id = admission_id
         self.name = name
         self.value = float(value)
@@ -33,10 +33,15 @@ class Patient:
     """Patient class to store patient information."""
 
     def __init__(
-        self, id: str, gender: str, dob: str, race: str, labs: list[Lab]
+        self,
+        patient_id: str,
+        gender: str,
+        dob: str,
+        race: str,
+        labs: list[Lab],
     ):
         """Initialize a patient object."""
-        self.id = id
+        self.patient_id = patient_id
         self.gender = gender
         self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
         self.race = race
@@ -55,13 +60,12 @@ class Patient:
     @property
     def first_admit(self) -> int:
         """Calculate the age of the patient at first admission."""
-        # sort the lab list by dates
-        self.lab.sort(key=lambda x: x.dates)
+        min_lab_date = min(self.lab, key=lambda x: x.dates).dates
         return (
-            self.lab[0].dates.year
+            min_lab_date.year
             - self.dob.year
             - (
-                (self.lab[0].dates.month, self.lab[0].dates.day)
+                (min_lab_date.month, min_lab_date.day)
                 < (self.dob.month, self.dob.day)
             )
         )
