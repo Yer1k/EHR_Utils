@@ -31,8 +31,8 @@ The `patients.txt` file contains the following columns:
 - `PatientDateOfBirth`: date of birth of the patient in the format of `YYYY-MM-DD HH:MM:SS.SSS`
 - `PatientRace`: race of the patient
 - `PatientMaritalStatus`: marital status of the patient
-- `PatientLanguage`: language of the patient
-- `PatientPopulationPercentageBelowPoverty`: percentage of the population below poverty of the patient's residence
+- [Optional]`PatientLanguage`: language of the patient
+- [Optional]`PatientPopulationPercentageBelowPoverty`: percentage of the population below poverty of the patient's residence
 
 The `labs.txt` file contains the following columns:
 
@@ -44,38 +44,40 @@ The `labs.txt` file contains the following columns:
 - `LabDateTime`: date and time of the lab test in the format of `YYYY-MM-DD HH:MM:SS.SSS`
 
 
-Then, you can use the `analysis` module to perform analyses, including parsing the patient and lab data with `parse_data` function, checking patient age with `patient_age` function, and testing whether patient is sick with `patient_is_sick` function. Specifically:
+Then, you can use the `analysis` module to perform analyses, including parsing the patient and lab data with `parse_data` function which returns a dictionary of `Patient` objects, calculating the age of the patient with property `age` of `Patient` object, checking whether the patient is sick with `is_sick` method of `Patient` object, and calculating the age of the patient when their earliest lab was recorded with `first_admit` method of `Patient` object.
+
 
 #### Parse data
-The function `patient_data(patient_filename: str) -> dict[str, dict[str, str]]` should take the path to the patient data and the path to the lab data and return a dictionary of patient records. For example,
+The function `patient_data(patient_filename: str) -> dict[str, Patient]` should take the path to the patient data and the path to the lab data and return a dictionary of `Patient` objects. For example,
 
 ```python
->> records = parse_data("[data]/patients.csv", "[data]/labs.csv")
+>> patient_records = parse_data("[data]/patients.txt", "[data]/labs.txt")
 ```
 
-#### Patient age
-The function `patient_age(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]], patient_id: str) -> int` should take the data and return the age of the patient. For example,
+#### Patient age property
+The property `age` of `Patient` object should take the data and return the age of the patient. For example,
 
 ```python
->> patient_age(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C")
+>> patient_records["1A8791E3-A61C-455A-8DEE-763EB90C9B2C"].age
 49
 ```
 
-#### Sick patients
-The function `patient_is_sick(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]], patient_id: str, lab_name: str, operator: str, value: float,) -> bool` should take the data and return a boolean indicating whether **the patient has ever had a test** with value above (">") or below ("<") the given level. For example,
+#### First admission age property
+The property `first_admit` of `Patient` object should take the data and return the age of the patient when their earliest lab was recorded. For example,
 
 ```python
->> patient_is_sick(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C", "METABOLIC: ALBUMIN", ">", 4.0)
+>> patient_records["1A8791E3-A61C-455A-8DEE-763EB90C9B2C"].first_admit
+18
+```
+
+#### Sick patient check
+The method `is_sick` of `Patient` object should take the data and return whether the patient is sick. For example,
+
+```python
+>> patient_records["1A8791E3-A61C-455A-8DEE-763EB90C9B2C"].is_sick( "METABOLIC: ALBUMIN", ">", 4.0)
 True
 ```
 
-#### Patient age at first admission
-The function `age_at_first_admit(records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]], patient_id: str,) -> int` should take the data and return the age of a given patient when their earliest lab was recorded. For example,
-
-```python
->> age_at_first_admit(records, "1A8791E3-A61C-455A-8DEE-763EB90C9B2C")
-18
-```
 
 ## Instruction for contributors
 

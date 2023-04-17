@@ -112,9 +112,7 @@ def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
     return patient_dict  # O(1)
 
 
-def lab_data(
-    lab_filename: str, patient_id: str
-) -> dict[str, list[dict[str, str]]]:
+def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
     """
     Create a dictionary of lab results.
 
@@ -141,146 +139,32 @@ def lab_data(
     return lab_dict  # O(1)
 
 
-def parse_data(
-    patient_filename: str, lab_filename: str
-) -> tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]]:
+def parse_data(patient_filename: str, lab_filename: str) -> dict[str, Patient]:
     """
-    Read and parse data from patient and lab files.
+    Read and parse data from patient and lab files to create patient objects.
 
-    Time complexity analysis:
-    The function will run O(1) time complexity to call two functions.
-    The function will scale according to the number of patients (NP) and
-        the number of columns in the patient personal file (MP).
-    In addition, the function will scale according to the number of rows
-        in the lab results (NL) and the number of columns in the lab results
-        file (ML).
-    To sum up, the time complexity will be O(NP*MP + NL*ML).
+    Patient objects are stored in a dictionary with patient ID as the key.
     """
     patient_dict = patient_data(patient_filename)  # O(NP*MP)
-    # patient = {}  # O(1)
-    # patient["PatientID"] = patient_dict[patient["PatientID"]]  # O(1)
-
-    # patient = Patient(
-    #     patient_dict["PatientID"],
-    #     patient_dict["PatientGender"],
-    #     patient_dict["PatientDOB"],
-    #     patient_dict["PatientRace"],
-    #     lab_dict["PatientID"],
-    # )
-    # patient_dict = {
-    #     id: patient_object(),
-    # }  # O(1)
-    # with open(
-    #     patient_filename, "r", encoding="utf-8-sig"
-    # ) as patient_file:  # O(1)
-    #     patient_column_names = (
-    #         patient_file.readline().strip().split("\t")
-    #     )  # O(MP)
-    #     for line in patient_file:  # O(NP)
-    #         patient_values = line.strip().split("\t")  # O(MP)
-    #         patient = {
-    #             patient_column_names[i]: patient_values[i]
-    #             for i in range(len(patient_column_names))
-    #         }  # O(1) to create the dictionary,
-    #         # but then scale to O(MP), number of columns
-    #         patient_dict[patient["PatientID"]] = Patient(
-    #             patient["PatientID"],
-    #             patient["PatientGender"],
-    #             patient["PatientDateOfBirth"],
-    #             patient["PatientRace"],
-    #         )  # O(1)
-
-    return patient_data(patient_filename), lab_data(lab_filename)
-    # O(NP*MP + NL*ML)
-
-
-def patient_age(
-    records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
-    patient_id: str,
-) -> int:
-    """
-    Return the age of the patient.
-
-    Time complexity analysis:
-    The function will run O(1) time complexity to calculate the age.
-    Overall, the function will not scale, istead it will run O(1).
-    """
-    patient = records[0][patient_id]  # O(1)
-    birth_date = datetime.strptime(
-        patient["PatientDateOfBirth"], "%Y-%m-%d %H:%M:%S.%f"
-    )  # O(1)
-    day_now = datetime.now()  # O(1)
-    patient_age = int((day_now - birth_date).days / 365)  # O(1)
-    return patient_age  # O(1)
-
-
-def patient_is_sick(
-    records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
-    patient_id: str,
-    lab_name: str,
-    operator: str,
-    value: float,
-) -> bool:
-    """
-    Return True if the patient is sick, False otherwise.
-
-    Time complexity analysis:
-    The function will run O(1) time complexity to check if the patient_id
-        is on the dictionary of lab results.
-    The function will scale according to the loop of the lab results (NL),
-        if for a patient have multiple lab results, it will scale to O(MNL),
-        this may be implement in the future.
-    Thus, the function will scale according to O(MNL).
-    """
-    if patient_id in records[1]:  # O(1)
-        for lab in records[1][patient_id]:  # O(NL)
-            if (
-                (lab["LabName"] == lab_name)
-                and (operator == ">")
-                and (float(lab["LabValue"]) > value)
-            ):  # O(1)
-                return True  # O(1)
-            elif (
-                (lab["LabName"] == lab_name)
-                and (operator == "<")
-                and (float(lab["LabValue"]) < value)
-            ):
-                return True  # O(1)
-    return False  # O(1)
-
-
-def age_at_first_admit(
-    records: tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]],
-    patient_id: str,
-) -> int:
-    """
-    Return the age of the patient at the first admission.
-
-    If results are not available, return -1 instead.
-    Time complexity analysis:
-    The function will run O(1) time complexity to check if the patient_id
-        is on the dictionary of lab results.
-    The function will scale according to the loop of the lab results (NL),
-        if for a patient have multiple lab results, it will scale to O(NLlogNL)
-        to sort the list of lab results by LabDateTime.
-    Thus, the function will scale according to O(NLlogNL).
-    """
-    if patient_id in records[1]:  # O(1)
-        for lab in records[1][patient_id]:  # O(NL)
-            if lab["AdmissionID"] == "1":  # O(1)
-                # sort the list of lab results by LabDateTime
-                sorted_lab = sorted(
-                    records[1][patient_id], key=lambda t: t["LabDateTime"]
-                )  # O(NLlogNL)
-                birth_date = datetime.strptime(
-                    records[0][patient_id]["PatientDateOfBirth"],
-                    "%Y-%m-%d %H:%M:%S.%f",
-                )  # O(1)
-                first_admit_date = datetime.strptime(
-                    sorted_lab[0]["LabDateTime"], "%Y-%m-%d %H:%M:%S.%f"
-                )  # O(1)
-                patient_age = int(
-                    (first_admit_date - birth_date).days / 365
-                )  # O(1)
-                return patient_age  # O(1)
-    return -1  # O(1)
+    lab_dict = lab_data(lab_filename)  # O(NL*ML)
+    patient = {}  # O(1)
+    lab_list = []  # O(1)
+    for patient_id in patient_dict:
+        for lab in lab_dict[patient_id]:
+            lab_obj = Lab(
+                patient_id,
+                lab["AdmissionID"],
+                lab["LabName"],
+                lab["LabValue"],
+                lab["LabUnits"],
+                lab["LabDateTime"],
+            )
+            lab_list.append(lab_obj)
+        patient[patient_id] = Patient(
+            patient_dict[patient_id]["PatientID"],
+            patient_dict[patient_id]["PatientGender"],
+            patient_dict[patient_id]["PatientDateOfBirth"],
+            patient_dict[patient_id]["PatientRace"],
+            lab_list,
+        )  # O(1)
+    return patient  # O(1)
