@@ -52,6 +52,9 @@ def test_patient_class() -> None:
     assert patient.race == "Asian"
     assert patient.age == 29
     assert patient.first_admit == 25
+    assert patient.is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
+    assert patient.is_sick("METABOLIC: ALBUMIN", "<", 5.0)
+    assert patient.is_sick("METABOLIC: ALBUMIN", ">", 3.0)
     assert patient.lab[0].patient_id == "1"
     assert patient.lab[0].admission_id == "1"
     assert patient.lab[0].name == "METABOLIC: ALBUMIN"

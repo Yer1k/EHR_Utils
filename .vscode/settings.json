@@ -4,8 +4,11 @@
     "editor.rulers": [
         79
     ],
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.linting.mypyEnabled": true,
     "python.linting.pycodestyleEnabled": true,
-    "python.linting.pydocstyleEnabled": true
+    "python.linting.pydocstyleEnabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
 }
