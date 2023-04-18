@@ -9,49 +9,24 @@ import sqlite3
 
 
 class Lab:
-    """Lab class to read lab data from sqlite database."""
+    """Lab class to store lab information."""
 
     def __init__(
         self,
         patient_id: str,
-        connection: sqlite3.Connection,
-        # like define connection here?
-        #     # admission_id: str,
-        #     # name: str,
-        #     # value: str,
-        #     # units: str,
-        #     # dates: str,
+        # admission_id: str,
+        # name: str,
+        # value: str,
+        # units: str,
+        # dates: str,
     ):
         """Initialize a lab object."""
         self.patient_id = patient_id
-
-    @property
-    def adimission_id(self):
-        """Get admission id from sqlite."""
-        admission_id = c.execute(
-            f"SELECT admission_id FROM lab WHERE patient_id = {self.patient_id}"
-        ).fetchall()
-        return admission_id
-
-    @property
-    def lab_name(self):
-        """Get lab name from sqlite."""
-        self.name = c.execute(
-            f"SELECT lab_name FROM lab WHERE patient_id = {self.patient_id}"
-        ).fetchall()
-
-    @property
-    def lab_value(self):
-        """Get lab value from sqlite."""
-        self.value = c.execute(
-            f"SELECT lab_value FROM lab WHERE patient_id = {self.patient_id}"
-        ).fetchall()
-
-    #     # self.admission_id = admission_id
-    #     # self.name = name
-    #     # self.value = float(value)
-    #     # self.units = units
-    #     # self.dates = datetime.strptime(dates, "%Y-%m-%d %H:%M:%S.%f")
+        # self.admission_id = admission_id
+        # self.name = name
+        # self.value = float(value)
+        # self.units = units
+        # self.dates = datetime.strptime(dates, "%Y-%m-%d %H:%M:%S.%f")
 
 
 class Patient:
@@ -67,10 +42,10 @@ class Patient:
     ):
         """Initialize a patient object."""
         self.patient_id = patient_id
-        # self.gender = gender
-        # self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
-        # self.race = race
-        # self.lab = labs
+        self.gender = gender
+        self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
+        self.race = race
+        self.lab = labs
 
     @property
     def age(self) -> int:
@@ -113,120 +88,94 @@ class Patient:
         return False  # O(1)
 
 
-def patient_data(
-    patient_filename: str, db_connection: sqlite3.Connection
-) -> None:
-    """Pass patient data to database."""
-    conn = db_connection
-    c = conn.cursor()
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS patient (
-            patient_id text PRIMARY KEY,
-            gender text,
-            dob text,
-            race text,
-            """
-    )
-    with open(patient_filename, "r", encoding="utf-8-sig") as patient_file:
-        patient_column_names = patient_file.readline().strip().split("\t")
-        for line in patient_file:
-            patient_values = line.strip().split("\t")
+def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
+    """
+    Create a dictionary of patient personal file.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to create dictionary.
+    The function will scale according to the number of patients (NP) and
+        the number of columns in the patient personal file (MP).
+    Thus, the function will scale according to O(NP*MP).
+    """
+    patient_dict = {}  # O(1)
+    with open(
+        patient_filename, "r", encoding="utf-8-sig"
+    ) as patient_file:  # O(1)
+        patient_column_names = (
+            patient_file.readline().strip().split("\t")
+        )  # O(MP)
+        for line in patient_file:  # O(NP)
+            patient_values = line.strip().split("\t")  # O(MP)
             patient = {
                 patient_column_names[i]: patient_values[i]
                 for i in range(len(patient_column_names))
-            }
-            c.execute(
-                f"""
-                INSERT INTO patient VALUES (?, ?, ?, ?)
-                [
-                    {patient["PatientID"]},
-                    {patient["PatientGender"]},
-                    {patient["PatientDateOfBirth"]},
-                    {patient["PatientRace"]},
-                ]
-                """
-            )
-    conn.commit()
-    patient_file.close()
-    conn.close()
+            }  # O(1) to create the dictionary,
+            # but then scale to O(MP), number of columns
+            patient_id = patient["PatientID"]  # O(1)
+            patient_dict[patient_id] = patient  # O(1)
+    return patient_dict  # O(1)
 
 
-def lab_data(lab_filename: str, db_connection: sqlite3.Connection) -> None:
-    """Pass lab data to database."""
-    conn = db_connection
-    c = conn.cursor()
-    c.execute(
-        """
-        CREATE TABLE IF NOT EXISTS lab (
-            patient_id text,
-            admission_id text,
-            lab_name text,
-            lab_value float,
-            lab_units text,
-            lab_dates text,
-            PRIMARY KEY (patient_id, admission_id, lab_name),
-        """
-    )
-    with open(lab_filename, "r", encoding="utf-8-sig") as lab_file:
-        lab_column_names = lab_file.readline().strip().split("\t")
-        for line in lab_file:
-            lab_values = line.strip().split("\t")
+def lab_data(lab_filename: str) -> dict[str, list[dict[str, str]]]:
+    """
+    Create a dictionary of lab results.
+
+    Time complexity analysis:
+    The function will run O(1) time complexity to create dictionary.
+    The function will scale according to the number of rows in the
+    lab results (NL) and the number of columns in the lab results file (ML).
+    Thus, the function will scale according to O(NL*ML).
+    """
+    lab_dict: dict[str, list[dict[str, str]]] = {}  # O(1)
+    with open(lab_filename, "r", encoding="utf-8-sig") as lab_file:  # O(1)
+        lab_column_names = lab_file.readline().strip().split("\t")  # O(ML)
+        for line in lab_file:  # O(NL)
+            lab_values = line.strip().split("\t")  # O(ML)
             lab = {
                 lab_column_names[i]: lab_values[i]
                 for i in range(len(lab_column_names))
-            }
-            c.execute(
-                f"""
-                INSERT INTO lab VALUES (?, ?, ?, ?, ?, ?)
-                [
-                    {lab["PatientID"]},
-                    {lab["AdmissionID"]},
-                    {lab["LabName"]},
-                    {lab["LabValue"]},
-                    {lab["LabUnits"]},
-                    {lab["LabDateTimes"]},
-                ]
-                """
-            )
-    conn.commit()
-    lab_file.close()
-    conn.close()
+            }  # O(1) to create the dictionary,
+            # but then scale to O(ML), number of columns
+            patient_id = lab["PatientID"]  # O(1)
+            if patient_id not in lab_dict:  # O(1)
+                lab_dict[patient_id] = []  # O(1)
+            lab_dict[patient_id].append(lab)  # O(1)
+    return lab_dict  # O(1)
 
 
-# def parse_data(patient_filename: str, lab_filename: str) -> None:
-#     """
-#    Read and parse data from patient and lab files to create sqlite databases.
+def parse_data(patient_filename: str, lab_filename: str) -> str:
+    """
+    Read and parse data from patient and lab files to create patient objects.
 
-#     Both files are tab-delimited.
-#     """
-#     conn = sqlite3.connect("patient.db")
-#     c = conn.cursor()
-#     c.execute(
-#         """
-#         CREATE TABLE IF NOT EXISTS patient (
+    Patient objects are stored in a dictionary with patient ID as the key.
+    """
+    conn = sqlite3.connect("patient.db")  # O(1)
 
+    patient_dict = patient_data(patient_filename)  # O(NP*MP)
+    lab_dict = lab_data(lab_filename)  # O(NL*ML)
 
-# patient_dict = patient_data(patient_filename)  # O(NP*MP)
-# lab_dict = lab_data(lab_filename)  # O(NL*ML)
-# patient = {}  # O(1)
-# lab_list = []  # O(1)
-# for patient_id in patient_dict:
-#     for lab in lab_dict[patient_id]:
-#         lab_obj = Lab(
-#             patient_id,
-#             lab["AdmissionID"],
-#             lab["LabName"],
-#             lab["LabValue"],
-#             lab["LabUnits"],
-#             lab["LabDateTime"],
-#         )
-#         lab_list.append(lab_obj)
-#     patient[patient_id] = Patient(
-#         patient_dict[patient_id]["PatientID"],
-#         patient_dict[patient_id]["PatientGender"],
-#         patient_dict[patient_id]["PatientDateOfBirth"],
-#         patient_dict[patient_id]["PatientRace"],
-#         lab_list,
-#     )  # O(1)
-# return patient  # O(1)
+    return "patient.db created"
+
+    # patient = {}  # O(1)
+    # lab_list = []  # O(1)
+    # for patient_id in patient_dict:
+    #     lab_list = [
+    #         Lab(
+    #             patient_id,
+    #             lab["AdmissionID"],
+    #             lab["LabName"],
+    #             lab["LabValue"],
+    #             lab["LabUnits"],
+    #             lab["LabDateTime"],
+    #         )
+    #         for lab in lab_dict[patient_id]
+    #     ]
+    #     patient[patient_id] = Patient(
+    #         patient_dict[patient_id]["PatientID"],
+    #         patient_dict[patient_id]["PatientGender"],
+    #         patient_dict[patient_id]["PatientDateOfBirth"],
+    #         patient_dict[patient_id]["PatientRace"],
+    #         lab_list,
+    #     )  # O(1)
+    # return patient  # O(1)
