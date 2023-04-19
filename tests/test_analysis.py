@@ -1,11 +1,66 @@
 """Test the analysis module."""
 from analysis import (
     parse_data,
-    patient_age,
-    patient_is_sick,
-    age_at_first_admit,
+    Lab,
+    Patient,
 )
 from fake_files import fake_files
+from datetime import datetime
+
+
+def test_lab_class() -> None:
+    """Test the lab class in analysis python."""
+    lab = Lab(
+        "1",
+        "1",
+        "METABOLIC: ALBUMIN",
+        "4.0",
+        "g/dL",
+        "2019-01-01 00:00:00.000",
+    )
+    assert lab is not None
+    assert lab.patient_id == "1"
+    assert lab.admission_id == "1"
+    assert lab.name == "METABOLIC: ALBUMIN"
+    assert lab.value == 4.0
+    assert lab.units == "g/dL"
+    assert lab.dates == datetime(2019, 1, 1)
+
+
+def test_patient_class() -> None:
+    """Test the patient class in analysis python."""
+    patient = Patient(
+        "1",
+        "Male",
+        "1993-12-21 17:45:40.547",
+        "Asian",
+        [
+            Lab(
+                "1",
+                "1",
+                "METABOLIC: ALBUMIN",
+                "4.0",
+                "g/dL",
+                "2019-01-01 00:00:00.000",
+            ),
+        ],
+    )
+    assert patient is not None
+    assert patient.patient_id == "1"
+    assert patient.gender == "Male"
+    assert patient.dob == datetime(1993, 12, 21, 17, 45, 40, 547000)
+    assert patient.race == "Asian"
+    assert patient.age == 29
+    assert patient.first_admit == 25
+    assert patient.is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
+    assert patient.is_sick("METABOLIC: ALBUMIN", "<", 5.0)
+    assert patient.is_sick("METABOLIC: ALBUMIN", ">", 3.0)
+    assert patient.lab[0].patient_id == "1"
+    assert patient.lab[0].admission_id == "1"
+    assert patient.lab[0].name == "METABOLIC: ALBUMIN"
+    assert patient.lab[0].value == 4.0
+    assert patient.lab[0].units == "g/dL"
+    assert patient.lab[0].dates == datetime(2019, 1, 1)
 
 
 def test_parse_data() -> None:
@@ -30,15 +85,6 @@ def test_parse_data() -> None:
                 "Icelandic",
                 "18.08",
             ],
-            [
-                "2",
-                "Female",
-                "1970-07-25 13:04:20.717",
-                "Asian",
-                "Married",
-                "English",
-                "6.67",
-            ],
         ],
         [
             [
@@ -59,107 +105,20 @@ def test_parse_data() -> None:
             ],
         ],
     ) as (patient_file, lab_file):
-        records = parse_data(patient_file, lab_file)
-        assert records == (
-            {
-                "1": {
-                    "PatientID": "1",
-                    "PatientGender": "Male",
-                    "PatientDateOfBirth": "1947-12-28 02:45:40.547",
-                    "PatientRace": "Unknown",
-                    "PatientMaritalStatus": "Married",
-                    "PatientLanguage": "Icelandic",
-                    "PatientPopulationPercentageBelowPoverty": "18.08",
-                },
-                "2": {
-                    "PatientID": "2",
-                    "PatientGender": "Female",
-                    "PatientDateOfBirth": "1970-07-25 13:04:20.717",
-                    "PatientRace": "Asian",
-                    "PatientMaritalStatus": "Married",
-                    "PatientLanguage": "English",
-                    "PatientPopulationPercentageBelowPoverty": "6.67",
-                },
-            },
-            {
-                "1": [
-                    {
-                        "PatientID": "1",
-                        "AdmissionID": "1",
-                        "LabName": "METABOLIC: ALBUMIN",
-                        "LabValue": "4.0",
-                        "LabUnits": "g/dL",
-                        "LabDateTime": "2019-01-01 00:00:00.000",
-                    }
-                ]
-            },
-        )
-
-
-def parse_data_helper() -> (
-    tuple[dict[str, dict[str, str]], dict[str, list[dict[str, str]]]]
-):
-    """Store the records from the fake files."""
-    records = (
-        {
-            "1": {
-                "PatientID": "1",
-                "PatientGender": "Male",
-                "PatientDateOfBirth": "1947-12-28 02:45:40.547",
-                "PatientRace": "Unknown",
-                "PatientMaritalStatus": "Married",
-                "PatientLanguage": "Icelandic",
-                "PatientPopulationPercentageBelowPoverty": "18.08",
-            },
-            "2": {
-                "PatientID": "2",
-                "PatientGender": "Female",
-                "PatientDateOfBirth": "1970-07-25 13:04:20.717",
-                "PatientRace": "Asian",
-                "PatientMaritalStatus": "Married",
-                "PatientLanguage": "English",
-                "PatientPopulationPercentageBelowPoverty": "6.67",
-            },
-        },
-        {
-            "1": [
-                {
-                    "PatientID": "1",
-                    "AdmissionID": "1",
-                    "LabName": "METABOLIC: ALBUMIN",
-                    "LabValue": "4.0",
-                    "LabUnits": "g/dL",
-                    "LabDateTime": "2019-01-01 00:00:00.000",
-                }
-            ]
-        },
-    )
-    return records
-
-
-def test_patient_age() -> None:
-    """Test the patient_age function in analysis python."""
-    records = parse_data_helper()
-    assert patient_age(records, "1") == 75
-    assert patient_age(records, "2") == 52
-
-
-def test_patient_is_sick() -> None:
-    """Test the patient_is_sick function in analysis python."""
-    records = parse_data_helper()
-    assert (
-        patient_is_sick(records, "1", "METABOLIC: ALBUMIN", ">", 5.0) is False
-    )
-    assert (
-        patient_is_sick(records, "1", "METABOLIC: ALBUMIN", "<", 5.0) is True
-    )
-    assert (
-        patient_is_sick(records, "1", "METABOLIC: ALBUMIN", ">", 2.0) is True
-    )
-
-
-def test_age_at_first_admit() -> None:
-    """Test the age_at_first_admit function in analysis python."""
-    records = parse_data_helper()
-    assert age_at_first_admit(records, "1") == 71
-    assert age_at_first_admit(records, "2") == -1
+        patient = parse_data(patient_file, lab_file)
+        assert patient is not None
+        assert patient["1"].patient_id == "1"
+        assert patient["1"].gender == "Male"
+        assert patient["1"].dob == datetime(1947, 12, 28, 2, 45, 40, 547000)
+        assert patient["1"].race == "Unknown"
+        assert patient["1"].age == 75
+        assert patient["1"].first_admit == 71
+        assert patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
+        assert patient["1"].is_sick("METABOLIC: ALBUMIN", "<", 5.0)
+        assert patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 3.0)
+        assert patient["1"].lab[0].patient_id == "1"
+        assert patient["1"].lab[0].admission_id == "1"
+        assert patient["1"].lab[0].name == "METABOLIC: ALBUMIN"
+        assert patient["1"].lab[0].value == 4.0
+        assert patient["1"].lab[0].units == "g/dL"
+        assert patient["1"].lab[0].dates == datetime(2019, 1, 1)

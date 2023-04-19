@@ -6,6 +6,7 @@ venv/
 00_source_data/*
 00_source_data/
 src/*.txt
+src/*.txt
 .coverage
 src/.*
 test_report.txt
