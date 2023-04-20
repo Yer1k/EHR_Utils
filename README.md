@@ -72,7 +72,7 @@ The property `first_admit` of `Patient` object should take the data and return t
 ```
 
 #### Sick patient check
-The method `is_sick` of `Patient` object should take the data and return whether the patient is sick. For example,
+The method `is_sick` of `Lab` object should take the data and return whether the patient is sick. For example,
 
 ```python
 >> Lab("1A8791E3-A61C-455A-8DEE-763EB90C9B2C").is_sick( "METABOLIC: ALBUMIN", ">", 4.0)
