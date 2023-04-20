@@ -53,6 +53,7 @@ The function `patient_data(patient_filename: str) -> dict[str, Patient]` should 
 ```python
 >> parse_data(patient_file, lab_file)
 "patient.db created"
+
 ```
 
 #### Patient age property
@@ -67,6 +68,7 @@ The property `age` of `Patient` object should take the data and return the age o
 The property `first_admit` of `Patient` object should take the data and return the age of the patient when their earliest lab was recorded. For example,
 
 ```python
+
 >> Patient("1A8791E3-A61C-455A-8DEE-763EB90C9B2C").first_admit
 18
 ```
