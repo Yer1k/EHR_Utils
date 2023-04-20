@@ -14,19 +14,69 @@ class Lab:
     def __init__(
         self,
         patient_id: str,
-        # admission_id: str,
-        # name: str,
-        # value: str,
-        # units: str,
-        # dates: str,
     ):
         """Initialize a lab object."""
         self.patient_id = patient_id
-        # self.admission_id = admission_id
-        # self.name = name
-        # self.value = float(value)
-        # self.units = units
-        # self.dates = datetime.strptime(dates, "%Y-%m-%d %H:%M:%S.%f")
+        self.conn = sqlite3.connect("patient.db")
+        self.c = self.conn.cursor()
+
+    @property
+    def admission_id(self) -> None:
+        """Get admission id from lab table."""
+        self.c.execute(
+            "SELECT admission_id FROM Lab WHERE patient_id = ?",
+            (self.patient_id,),
+        )
+        self.c.fetchall()
+
+    @property
+    def lab_name(self) -> None:
+        """Get lab name from lab table."""
+        self.c.execute(
+            f"SELECT lab_name FROM Lab WHERE patient_id = {self.patient_id}"
+        )
+        self.c.fetchall()
+
+    @property
+    def lab_value(self) -> float:
+        """Get lab value from lab table."""
+        self.c.execute(
+            f"SELECT lab_value FROM Lab WHERE patient_id = {self.patient_id}"
+        )
+        lab_value = self.c.fetchall()
+        return float(lab_value[0])
+
+    @property
+    def lab_units(self) -> None:
+        """Get lab units from lab table."""
+        self.c.execute(
+            f"SELECT lab_units FROM Lab WHERE patient_id = {self.patient_id}"
+        )
+        self.c.fetchall()
+
+    @property
+    def lab_dates(self) -> None:
+        """Get lab dates from lab table."""
+        self.c.execute(
+            f"SELECT lab_dates FROM Lab WHERE patient_id = {self.patient_id}"
+        )
+        self.c.fetchall()
+
+    def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
+        """Check if the patient is sick."""
+        if (
+            (self.lab_name == lab_name)
+            and (operator == ">")
+            and (self.lab_value > value)
+        ):
+            return True
+        elif (
+            (self.lab_name == lab_name)
+            and (operator == "<")
+            and (self.lab_value < value)
+        ):
+            return True
+        return False
 
 
 class Patient:
@@ -35,17 +85,37 @@ class Patient:
     def __init__(
         self,
         patient_id: str,
-        # gender: str,
-        # dob: str,
-        # race: str,
-        # labs: list[Lab],
     ):
         """Initialize a patient object."""
         self.patient_id = patient_id
-        self.gender = gender
-        self.dob = datetime.strptime(dob, "%Y-%m-%d %H:%M:%S.%f")
-        self.race = race
-        self.lab = labs
+        self.conn = sqlite3.connect("patient.db")
+        self.c = self.conn.cursor()
+
+    @property
+    def gender(self) -> None:
+        """Get Patient Gender from Patient table."""
+        self.c.execute(
+            f"SELECT gender FROM Patient WHERE patient_id = {self.patient_id}"
+        )
+        self.c.fetchall()
+        # return
+
+    @property
+    def dob(self) -> datetime:
+        """Get Patient DOB from Patient table."""
+        self.c.execute(
+            f"SELECT dob FROM Patient WHERE patient_id = {self.patient_id}"
+        )
+        dob = datetime.strptime(self.c.fetchall()[0], "%Y-%m-%d-%H.%M.%S.%f")
+        return dob
+
+    @property
+    def race(self) -> None:
+        """Get Patient Race from Patient table."""
+        self.c.execute(
+            f"SELECT race FROM Patient WHERE patient_id = {self.patient_id}"
+        )
+        self.c.fetchall()
 
     @property
     def age(self) -> int:
@@ -60,7 +130,12 @@ class Patient:
     @property
     def first_admit(self) -> int:
         """Calculate the age of the patient at first admission."""
-        min_lab_date = min(self.lab, key=lambda x: x.dates).dates
+        self.c.execute(
+            f"SELECT MIN(Dates) FROM Lab WHERE patient_id = {self.patient_id}"
+        )
+        min_lab_date = datetime.strptime(
+            self.c.fetchall()[0], "%Y-%m-%d-%H.%M.%S.%f"
+        )
         return (
             min_lab_date.year
             - self.dob.year
@@ -69,23 +144,6 @@ class Patient:
                 < (self.dob.month, self.dob.day)
             )
         )
-
-    def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
-        """Check if the patient is sick."""
-        for lab in self.lab:
-            if (
-                (lab.name == lab_name)
-                and (operator == ">")
-                and (lab.value > value)
-            ):  # O(1)
-                return True  # O(1)
-            elif (
-                (lab.name == lab_name)
-                and (operator == "<")
-                and (lab.value < value)
-            ):
-                return True  # O(1)
-        return False  # O(1)
 
 
 def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
@@ -150,32 +208,59 @@ def parse_data(patient_filename: str, lab_filename: str) -> str:
 
     Patient objects are stored in a dictionary with patient ID as the key.
     """
-    conn = sqlite3.connect("patient.db")  # O(1)
-
-    patient_dict = patient_data(patient_filename)  # O(NP*MP)
-    lab_dict = lab_data(lab_filename)  # O(NL*ML)
+    conn = sqlite3.connect("patient.db")
+    c = conn.cursor()
+    patient_dict = patient_data(patient_filename)
+    lab_dict = lab_data(lab_filename)
+    c.execute("DROP TABLE IF EXISTS patient")
+    c.execute("DROP TABLE IF EXISTS lab")
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS patient (
+            patient_id TEXT,
+            gender TEXT,
+            dob TEXT,
+            race TEXT)
+        """
+    )
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS lab (
+            patient_id TEXT,
+            admission_id TEXT,
+            lab_name TEXT,
+            lab_value REAL,
+            lab_units TEXT,
+            lab_date TEXT)
+        """
+    )
+    for patient_id in patient_dict:
+        c.execute(
+            """
+            INSERT INTO patient VALUES (?, ?, ?, ?)
+            """,
+            (
+                patient_dict[patient_id]["PatientID"],
+                patient_dict[patient_id]["PatientGender"],
+                patient_dict[patient_id]["PatientDateOfBirth"],
+                patient_dict[patient_id]["PatientRace"],
+            ),
+        )
+        for lab in lab_dict[patient_id]:
+            c.execute(
+                """
+                INSERT INTO lab VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    lab["PatientID"],
+                    lab["AdmissionID"],
+                    lab["LabName"],
+                    lab["LabValue"],
+                    lab["LabUnits"],
+                    lab["LabDateTime"],
+                ),
+            )
+    conn.commit()
+    conn.close()
 
     return "patient.db created"
-
-    # patient = {}  # O(1)
-    # lab_list = []  # O(1)
-    # for patient_id in patient_dict:
-    #     lab_list = [
-    #         Lab(
-    #             patient_id,
-    #             lab["AdmissionID"],
-    #             lab["LabName"],
-    #             lab["LabValue"],
-    #             lab["LabUnits"],
-    #             lab["LabDateTime"],
-    #         )
-    #         for lab in lab_dict[patient_id]
-    #     ]
-    #     patient[patient_id] = Patient(
-    #         patient_dict[patient_id]["PatientID"],
-    #         patient_dict[patient_id]["PatientGender"],
-    #         patient_dict[patient_id]["PatientDateOfBirth"],
-    #         patient_dict[patient_id]["PatientRace"],
-    #         lab_list,
-    #     )  # O(1)
-    # return patient  # O(1)
