@@ -21,46 +21,51 @@ class Lab:
         self.c = self.conn.cursor()
 
     @property
-    def admission_id(self) -> None:
+    def admission_id(self) -> str:
         """Get admission id from lab table."""
         self.c.execute(
-            "SELECT admission_id FROM Lab WHERE patient_id = ?",
+            "SELECT admission_id FROM lab WHERE patient_id = ?",
             (self.patient_id,),
         )
-        self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
-    def lab_name(self) -> None:
+    def lab_name(self) -> str:
         """Get lab name from lab table."""
         self.c.execute(
-            f"SELECT lab_name FROM Lab WHERE patient_id = {self.patient_id}"
+            "SELECT lab_name FROM lab WHERE patient_id = ?",
+            (self.patient_id,),
         )
-        self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
     def lab_value(self) -> float:
         """Get lab value from lab table."""
         self.c.execute(
-            f"SELECT lab_value FROM Lab WHERE patient_id = {self.patient_id}"
+            "SELECT lab_value FROM lab WHERE patient_id = ?",
+            (self.patient_id,),
         )
-        lab_value = self.c.fetchall()
+        lab_value = self.c.fetchone()
         return float(lab_value[0])
 
     @property
-    def lab_units(self) -> None:
+    def lab_units(self) -> str:
         """Get lab units from lab table."""
         self.c.execute(
-            f"SELECT lab_units FROM Lab WHERE patient_id = {self.patient_id}"
+            "SELECT lab_units FROM lab WHERE patient_id = ?",
+            (self.patient_id,),
         )
-        self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
-    def lab_dates(self) -> None:
+    def lab_date(self) -> datetime:
         """Get lab dates from lab table."""
         self.c.execute(
-            f"SELECT lab_dates FROM Lab WHERE patient_id = {self.patient_id}"
+            "SELECT lab_date FROM lab WHERE patient_id = ?",
+            (self.patient_id,),
         )
-        self.c.fetchall()
+        date = datetime.strptime(self.c.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f")
+        return date
 
     def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
         """Check if the patient is sick."""
@@ -92,30 +97,31 @@ class Patient:
         self.c = self.conn.cursor()
 
     @property
-    def gender(self) -> None:
-        """Get Patient Gender from Patient table."""
+    def gender(self) -> str:
+        """Get Patient Gender from patient table."""
         self.c.execute(
-            f"SELECT gender FROM Patient WHERE patient_id = {self.patient_id}"
+            "SELECT gender FROM patient WHERE patient_id = ?",
+            (self.patient_id,),
         )
-        self.c.fetchall()
-        # return
+        return str(self.c.fetchone()[0])
 
     @property
     def dob(self) -> datetime:
-        """Get Patient DOB from Patient table."""
+        """Get Patient DOB from patient table."""
         self.c.execute(
-            f"SELECT dob FROM Patient WHERE patient_id = {self.patient_id}"
+            "SELECT dob FROM patient WHERE patient_id = ?", (self.patient_id,)
         )
-        dob = datetime.strptime(self.c.fetchall()[0], "%Y-%m-%d-%H.%M.%S.%f")
+        dob = datetime.strptime(self.c.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f")
         return dob
 
     @property
-    def race(self) -> None:
-        """Get Patient Race from Patient table."""
+    def race(self) -> str:
+        """Get Patient Race from patient table."""
         self.c.execute(
-            f"SELECT race FROM Patient WHERE patient_id = {self.patient_id}"
+            "SELECT race FROM patient WHERE patient_id = ?",
+            (self.patient_id,),
         )
-        self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
     def age(self) -> int:
@@ -131,10 +137,11 @@ class Patient:
     def first_admit(self) -> int:
         """Calculate the age of the patient at first admission."""
         self.c.execute(
-            f"SELECT MIN(Dates) FROM Lab WHERE patient_id = {self.patient_id}"
+            "SELECT MIN(lab_date) FROM lab WHERE patient_id = ?",
+            (self.patient_id,),
         )
         min_lab_date = datetime.strptime(
-            self.c.fetchall()[0], "%Y-%m-%d-%H.%M.%S.%f"
+            self.c.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f"
         )
         return (
             min_lab_date.year

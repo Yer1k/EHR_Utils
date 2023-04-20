@@ -52,17 +52,17 @@ def test_parse_data() -> None:
     ) as (patient_file, lab_file):
         assert parse_data(patient_file, lab_file) == "patient.db created"
         assert Patient("1").patient_id == "1"
-        assert Patient("1").gender
+        assert Patient("1").gender == "Male"
         assert Patient("1").dob == datetime(1947, 12, 28, 2, 45, 40, 547000)
         assert Patient("1").race == "Unknown"
-        assert Patient("1").age == 72
-        assert Patient("1").first_admit == 69
-        assert Patient("1").is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
-        assert Patient["1"].is_sick("METABOLIC: ALBUMIN", "<", 5.0)
-        assert Patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 3.0)
+        assert Patient("1").age == 75
+        assert Patient("1").first_admit == 71
+        assert Lab("1").is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
+        assert Lab("1").is_sick("METABOLIC: ALBUMIN", "<", 5.0)
+        assert Lab("1").is_sick("METABOLIC: ALBUMIN", ">", 3.0)
         assert Lab("1").patient_id == "1"
         assert Lab("1").admission_id == "1"
         assert Lab("1").lab_name == "METABOLIC: ALBUMIN"
         assert Lab("1").lab_value == 4.0
         assert Lab("1").lab_units == "g/dL"
-        assert Lab("1").lab_dates == datetime(2019, 1, 1, 0, 0, 0, 0)
+        assert Lab("1").lab_date == datetime(2019, 1, 1, 0, 0, 0, 0)
