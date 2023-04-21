@@ -21,66 +21,77 @@ class Lab:
         self.c = self.conn.cursor()
 
     @property
-    def admission_id(self) -> str:
+    def admission_id(self) -> list[tuple[str]]:
         """Get admission id from lab table."""
         self.c.execute(
             "SELECT admission_id FROM lab WHERE patient_id = ?",
             (self.patient_id,),
         )
-        return str(self.c.fetchone()[0])
+        return self.c.fetchall()
 
     @property
-    def lab_name(self) -> str:
+    def lab_name(self) -> list[tuple[str]]:
         """Get lab name from lab table."""
         self.c.execute(
             "SELECT lab_name FROM lab WHERE patient_id = ?",
-            (self.patient_id,),
+            (self.patient_id),
         )
-        return str(self.c.fetchone()[0])
+        return self.c.fetchall()
 
     @property
-    def lab_value(self) -> float:
+    def lab_value(self) -> list[tuple[float]]:
         """Get lab value from lab table."""
         self.c.execute(
             "SELECT lab_value FROM lab WHERE patient_id = ?",
             (self.patient_id,),
         )
-        lab_value = self.c.fetchone()
-        return float(lab_value[0])
+        lab_value = self.c.fetchall()
+        return lab_value
 
     @property
-    def lab_units(self) -> str:
+    def lab_units(self) -> list[tuple[str]]:
         """Get lab units from lab table."""
         self.c.execute(
             "SELECT lab_units FROM lab WHERE patient_id = ?",
             (self.patient_id,),
         )
-        return str(self.c.fetchone()[0])
+        return self.c.fetchall()
 
     @property
-    def lab_date(self) -> datetime:
+    def lab_date(self) -> list[tuple[str]]:
         """Get lab dates from lab table."""
         self.c.execute(
             "SELECT lab_date FROM lab WHERE patient_id = ?",
             (self.patient_id,),
         )
-        date = datetime.strptime(self.c.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f")
-        return date
+        return self.c.fetchall()
 
     def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
         """Check if the patient is sick."""
-        if (
-            (self.lab_name == lab_name)
-            and (operator == ">")
-            and (self.lab_value > value)
-        ):
-            return True
-        elif (
-            (self.lab_name == lab_name)
-            and (operator == "<")
-            and (self.lab_value < value)
-        ):
-            return True
+        if operator == ">":
+            query = (
+                "SELECT lab_value FROM lab WHERE patient_id =? "
+                + "AND lab_name = ? \n"
+                + "ORDER BY lab_value DESC LIMIT 1"
+            )
+            lab_value = float(
+                self.c.execute(query, (self.patient_id, lab_name)).fetchone()[
+                    0
+                ]
+            )
+            return lab_value > value
+        elif operator == "<":
+            query = (
+                "SELECT lab_value FROM lab WHERE patient_id =? "
+                + "AND lab_name = ? \n"
+                + "ORDER BY lab_value ASC LIMIT 1"
+            )
+            lab_value = float(
+                self.c.execute(query, (self.patient_id, lab_name)).fetchone()[
+                    0
+                ]
+            )
+            return lab_value < value
         return False
 
 
