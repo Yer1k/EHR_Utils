@@ -8,61 +8,6 @@ from fake_files import fake_files
 from datetime import datetime
 
 
-def test_lab_class() -> None:
-    """Test the lab class in analysis python."""
-    lab = Lab(
-        "1",
-        "1",
-        "METABOLIC: ALBUMIN",
-        "4.0",
-        "g/dL",
-        "2019-01-01 00:00:00.000",
-    )
-    assert lab is not None
-    assert lab.patient_id == "1"
-    assert lab.admission_id == "1"
-    assert lab.name == "METABOLIC: ALBUMIN"
-    assert lab.value == 4.0
-    assert lab.units == "g/dL"
-    assert lab.dates == datetime(2019, 1, 1)
-
-
-def test_patient_class() -> None:
-    """Test the patient class in analysis python."""
-    patient = Patient(
-        "1",
-        "Male",
-        "1993-12-21 17:45:40.547",
-        "Asian",
-        [
-            Lab(
-                "1",
-                "1",
-                "METABOLIC: ALBUMIN",
-                "4.0",
-                "g/dL",
-                "2019-01-01 00:00:00.000",
-            ),
-        ],
-    )
-    assert patient is not None
-    assert patient.patient_id == "1"
-    assert patient.gender == "Male"
-    assert patient.dob == datetime(1993, 12, 21, 17, 45, 40, 547000)
-    assert patient.race == "Asian"
-    assert patient.age == 29
-    assert patient.first_admit == 25
-    assert patient.is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
-    assert patient.is_sick("METABOLIC: ALBUMIN", "<", 5.0)
-    assert patient.is_sick("METABOLIC: ALBUMIN", ">", 3.0)
-    assert patient.lab[0].patient_id == "1"
-    assert patient.lab[0].admission_id == "1"
-    assert patient.lab[0].name == "METABOLIC: ALBUMIN"
-    assert patient.lab[0].value == 4.0
-    assert patient.lab[0].units == "g/dL"
-    assert patient.lab[0].dates == datetime(2019, 1, 1)
-
-
 def test_parse_data() -> None:
     """Test the parse_data function in analysis python."""
     with fake_files(
@@ -103,22 +48,39 @@ def test_parse_data() -> None:
                 "g/dL",
                 "2019-01-01 00:00:00.000",
             ],
+            [
+                "1",
+                "2",
+                "METABOLIC: ALBUMIN",
+                "4.7",
+                "g/dL",
+                "2020-01-01 00:00:00.000",
+            ],
+            [
+                "1",
+                "2",
+                "URINALYSIS: RED BLOOD CELLS",
+                "1.8",
+                "rbc/hpf",
+                "2020-02-01 00:00:00.000",
+            ],
         ],
     ) as (patient_file, lab_file):
-        patient = parse_data(patient_file, lab_file)
-        assert patient is not None
-        assert patient["1"].patient_id == "1"
-        assert patient["1"].gender == "Male"
-        assert patient["1"].dob == datetime(1947, 12, 28, 2, 45, 40, 547000)
-        assert patient["1"].race == "Unknown"
-        assert patient["1"].age == 75
-        assert patient["1"].first_admit == 71
-        assert patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 4.1) is False
-        assert patient["1"].is_sick("METABOLIC: ALBUMIN", "<", 5.0)
-        assert patient["1"].is_sick("METABOLIC: ALBUMIN", ">", 3.0)
-        assert patient["1"].lab[0].patient_id == "1"
-        assert patient["1"].lab[0].admission_id == "1"
-        assert patient["1"].lab[0].name == "METABOLIC: ALBUMIN"
-        assert patient["1"].lab[0].value == 4.0
-        assert patient["1"].lab[0].units == "g/dL"
-        assert patient["1"].lab[0].dates == datetime(2019, 1, 1)
+        assert parse_data(patient_file, lab_file) == "patient.db created"
+        assert Patient("1").patient_id == "1"
+        assert Patient("1").gender == "Male"
+        assert Patient("1").dob == datetime(1947, 12, 28, 2, 45, 40, 547000)
+        assert Patient("1").race == "Unknown"
+        assert Patient("1").age == 75
+        assert Patient("1").first_admit == 71
+        assert not Patient("1").is_sick("METABOLIC: ALBUMIN", ">", 4.8)
+        assert Patient("1").is_sick("URINALYSIS: RED BLOOD CELLS", "<", 2.0)
+        assert not Patient("1").is_sick("METABOLIC: ALBUMIN", "=", 4.0)
+        assert Patient("1").is_sick("METABOLIC: ALBUMIN", "<", 5.0)
+        assert Patient("1").is_sick("METABOLIC: ALBUMIN", ">", 3.0)
+        assert Lab("1").lab_id == "1"
+        assert Lab("1").admission_id == "1"
+        assert Lab("1").lab_name == "METABOLIC: ALBUMIN"
+        assert Lab("1").lab_value == 4.0
+        assert Lab("1").lab_units == "g/dL"
+        assert Lab("1").lab_date == datetime(2019, 1, 1, 0, 0)
