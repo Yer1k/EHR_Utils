@@ -13,86 +13,58 @@ class Lab:
 
     def __init__(
         self,
-        patient_id: str,
+        lab_id: str,
     ):
         """Initialize a lab object."""
-        self.patient_id = patient_id
+        self.lab_id = lab_id
         self.conn = sqlite3.connect("patient.db")
         self.c = self.conn.cursor()
 
     @property
-    def admission_id(self) -> list[tuple[str]]:
+    def admission_id(self) -> str:
         """Get admission id from lab table."""
         self.c.execute(
-            "SELECT admission_id FROM lab WHERE patient_id = ?",
-            (self.patient_id,),
+            "SELECT admission_id FROM lab WHERE lab_id = ?",
+            (self.lab_id,),
         )
-        return self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
-    def lab_name(self) -> list[tuple[str]]:
+    def lab_name(self) -> str:
         """Get lab name from lab table."""
         self.c.execute(
-            "SELECT lab_name FROM lab WHERE patient_id = ?",
-            (self.patient_id),
+            "SELECT lab_name FROM lab WHERE lab_id = ?",
+            (self.lab_id),
         )
-        return self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
-    def lab_value(self) -> list[tuple[float]]:
+    def lab_value(self) -> float:
         """Get lab value from lab table."""
         self.c.execute(
-            "SELECT lab_value FROM lab WHERE patient_id = ?",
-            (self.patient_id,),
+            "SELECT lab_value FROM lab WHERE lab_id = ?",
+            (self.lab_id,),
         )
-        lab_value = self.c.fetchall()
-        return lab_value
+        lab_value = self.c.fetchone()[0]
+        return float(lab_value)
 
     @property
-    def lab_units(self) -> list[tuple[str]]:
+    def lab_units(self) -> str:
         """Get lab units from lab table."""
         self.c.execute(
-            "SELECT lab_units FROM lab WHERE patient_id = ?",
-            (self.patient_id,),
+            "SELECT lab_units FROM lab WHERE lab_id = ?",
+            (self.lab_id,),
         )
-        return self.c.fetchall()
+        return str(self.c.fetchone()[0])
 
     @property
-    def lab_date(self) -> list[tuple[str]]:
+    def lab_date(self) -> datetime:
         """Get lab dates from lab table."""
         self.c.execute(
-            "SELECT lab_date FROM lab WHERE patient_id = ?",
-            (self.patient_id,),
+            "SELECT lab_date FROM lab WHERE lab_id = ?",
+            (self.lab_id,),
         )
-        return self.c.fetchall()
-
-    def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
-        """Check if the patient is sick."""
-        if operator == ">":
-            query = (
-                "SELECT lab_value FROM lab WHERE patient_id =? "
-                + "AND lab_name = ? \n"
-                + "ORDER BY lab_value DESC LIMIT 1"
-            )
-            lab_value = float(
-                self.c.execute(query, (self.patient_id, lab_name)).fetchone()[
-                    0
-                ]
-            )
-            return lab_value > value
-        elif operator == "<":
-            query = (
-                "SELECT lab_value FROM lab WHERE patient_id =? "
-                + "AND lab_name = ? \n"
-                + "ORDER BY lab_value ASC LIMIT 1"
-            )
-            lab_value = float(
-                self.c.execute(query, (self.patient_id, lab_name)).fetchone()[
-                    0
-                ]
-            )
-            return lab_value < value
-        return False
+        return datetime.strptime(self.c.fetchone()[0], "%Y-%m-%d %H:%M:%S.%f")
 
 
 class Patient:
@@ -162,6 +134,34 @@ class Patient:
                 < (self.dob.month, self.dob.day)
             )
         )
+
+    def is_sick(self, lab_name: str, operator: str, value: float) -> bool:
+        """Check if the patient is sick."""
+        if operator == ">":
+            query = (
+                "SELECT lab_value FROM lab WHERE patient_id =? "
+                + "AND lab_name = ? \n"
+                + "ORDER BY lab_value DESC LIMIT 1"
+            )
+            lab_value = float(
+                self.c.execute(query, (self.patient_id, lab_name)).fetchone()[
+                    0
+                ]
+            )
+            return lab_value > value
+        elif operator == "<":
+            query = (
+                "SELECT lab_value FROM lab WHERE patient_id =? "
+                + "AND lab_name = ? \n"
+                + "ORDER BY lab_value ASC LIMIT 1"
+            )
+            lab_value = float(
+                self.c.execute(query, (self.patient_id, lab_name)).fetchone()[
+                    0
+                ]
+            )
+            return lab_value < value
+        return False
 
 
 def patient_data(patient_filename: str) -> dict[str, dict[str, str]]:
@@ -244,6 +244,7 @@ def parse_data(patient_filename: str, lab_filename: str) -> str:
     c.execute(
         """
         CREATE TABLE IF NOT EXISTS lab (
+            lab_id INTEGER PRIMARY KEY AUTOINCREMENT,
             patient_id TEXT,
             admission_id TEXT,
             lab_name TEXT,
@@ -267,9 +268,10 @@ def parse_data(patient_filename: str, lab_filename: str) -> str:
         for lab in lab_dict[patient_id]:
             c.execute(
                 """
-                INSERT INTO lab VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO lab VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
+                    None,
                     lab["PatientID"],
                     lab["AdmissionID"],
                     lab["LabName"],
